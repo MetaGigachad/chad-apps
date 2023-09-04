@@ -1,0 +1,22 @@
+services:
+
+  postgresdb:
+    image: postgres:15.4
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: accounts-backend
+    volumes:
+      - "./docker/postgresdb/init:/docker-entrypoint-initdb.d"
+
+  accounts-backend:
+    build: accounts/backend
+    ports:
+      - "8080:8080"
+    environment:
+      POSTGRES_URI: postgres://accounts-backend:${POSTGRES_PASSWORD}@postgresdb:5432/accounts-backend
+      HOST: 0.0.0.0
+      PORT: 8080
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      - postgresdb
+    

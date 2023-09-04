@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="30.534943mm"
+   height="12.06176mm"
+   viewBox="0 0 30.534943 12.06176"
+   version="1.1"
+   id="svg5"
+   inkscape:export-filename="logo.svg"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#0c0a09"
+     bordercolor="#999999"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false" />
+  <defs
+     id="defs2">
+    <inkscape:path-effect
+       effect="fillet_chamfer"
+       id="path-effect2006"
+       is_visible="true"
+       lpeversion="1"
+       nodesatellites_param="F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 | F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 | F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 | F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1"
+       unit="px"
+       method="auto"
+       mode="F"
+       radius="2"
+       chamfer_steps="1"
+       flexible="false"
+       use_knot_distance="true"
+       apply_no_radius="true"
+       apply_with_radius="true"
+       only_selected="true"
+       hide_knots="false" />
+    <rect
+       x="360.2709"
+       y="331.98663"
+       width="79.372734"
+       height="25.279068"
+       id="rect1906" />
+    <rect
+       x="360.2709"
+       y="331.98663"
+       width="78.312073"
+       height="25.279068"
+       id="rect1906-3" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-84.732531,-94.000005)">
+    <path
+       style="fill:#f5f5f4;stroke-width:0.264583"
+       d="m 100,99 h 11.26747 v -5 h 2 v 1.5 h 2 V 100 H 100 Z m 0,2 h 11.26747 v 5 h 2 v -1.5 h 2 V 100 H 100 Z m 0,-2 H 88.732528 v -5 h -2 v 1.5 h -2 V 100 H 100 Z m 0,2 H 88.732528 v 5 h -2 v -1.5 h -2 V 100 H 100 Z"
+       id="path1165"
+       sodipodi:nodetypes="ccccccccc"
+       inkscape:path-effect="#path-effect2006"
+       inkscape:original-d="m 100,99 h 11.26747 v -5 h 2 v 1.5 h 2 V 100 H 100 Z m 0,2 h 11.26747 v 5 h 2 v -1.5 h 2 V 100 H 100 Z m 0,-2 H 88.732528 v -5 h -2 v 1.5 h -2 V 100 H 100 Z m 0,2 H 88.732528 v 5 h -2 v -1.5 h -2 V 100 H 100 Z"
+       inkscape:export-filename="logo.svg"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,-5.4255714,5.0046218)"
+       id="text1904"
+       style="font-size:21.3333px;white-space:pre;shape-inside:url(#rect1906);fill:#f5f5f4;fill-opacity:1"><tspan
+         x="360.27148"
+         y="351.87946"
+         id="tspan2512"><tspan
+           style="font-weight:bold;font-family:'Ubuntu Condensed';-inkscape-font-specification:'Ubuntu Condensed,  Bold'"
+           id="tspan2510">TRAINING</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,-5.2051049,12.875657)"
+       id="text1904-7"
+       style="font-size:21.3333px;white-space:pre;shape-inside:url(#rect1906-3);fill:#f5f5f4;fill-opacity:1"><tspan
+         x="360.27148"
+         y="351.87946"
+         id="tspan2516"><tspan
+           style="font-weight:bold;font-family:'Ubuntu Condensed';-inkscape-font-specification:'Ubuntu Condensed,  Bold'"
+           id="tspan2514">JOURNAL</tspan></tspan></text>
+  </g>
+</svg>
