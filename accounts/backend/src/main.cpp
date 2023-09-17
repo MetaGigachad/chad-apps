@@ -3,8 +3,11 @@
 #include <format>
 
 #include "methods/log_in.h"
+#include "methods/log_out.h"
 #include "methods/refresh.h"
 #include "methods/sign_up.h"
+#include "server/options.h"
+#include "server/pre_routing.h"
 #include "state.h"
 #include "utils/logging.h"
 
@@ -28,8 +31,12 @@ int main(void) {
         res.status = 400;
     });
 
+    server::options(s);
+    server::pre_routing(s);
+
     methods::sign_up(s);
     methods::log_in(s);
+    methods::log_out(s);
     methods::refresh(s);
 
     info(std::format("Starting on {}:{}", s.env.HOST, s.env.PORT));

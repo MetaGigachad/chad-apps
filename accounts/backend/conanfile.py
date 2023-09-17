@@ -14,8 +14,8 @@ class AccountServiceRecipe(ConanFile):
         deps.generate()
         tc = CMakeToolchain(self)
         tc.generate()
-        self.cmake = CMake(self)
     
     def build(self):
+        self.cmake = CMake(self)
         self.cmake.configure()
         self.cmake.build()

@@ -20,7 +20,11 @@ add_executable(
   src/state.h
   src/utils/logging.h
   src/utils/jwt.h
+  src/utils/cookies.h
+  src/server/pre_routing.h
+  src/server/options.h
   src/methods/log_in.h
+  src/methods/log_out.h
   src/methods/sign_up.h
   src/methods/refresh.h)
 target_include_directories(${PROJECT_NAME} PRIVATE src)

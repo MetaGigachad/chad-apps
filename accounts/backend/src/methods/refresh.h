@@ -9,20 +9,15 @@
 #include <string>
 
 #include "state.h"
+#include "utils/cookies.h"
 #include "utils/jwt.h"
 
 namespace schemas::refresh {
 
-struct Request {
-    std::string refresh_token;
-};
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Request, refresh_token)
-
 struct Response {
     std::string access_token;
-    std::string refresh_token;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Response, access_token, refresh_token)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Response, access_token)
 
 };  // namespace schemas::refresh
 
@@ -36,36 +31,48 @@ void refresh(state::State& s) {
     using httplib::Response;
 
     s.svr.Post("/refresh", [&](const Request& req, Response& res) {
-        auto req_body = json::parse(req.body).get<scm::Request>();
         pqxx::work tx {*s.postgres};
 
-        auto refresh_token = verify_refresh_token(req_body.refresh_token, s.env.JWT_SECRET);
-        std::string user_name = refresh_token.get_id();
+        if (!req.has_header("Cookie")) {
+            res.status = 400;
+            res.set_content("No cookies", "text/plain");
+        }
+        auto cookies = parse_cookies(req.get_header_value("Cookie"));
+        if (!cookies.contains("refresh_token")) {
+            res.status = 400;
+            res.set_content("No refresh_token cookie", "text/plain");
+        }
+        auto old_refresh_token = cookies["refresh_token"];
+
+        auto old_decoded_refresh_token =
+            verify_refresh_token(old_refresh_token, s.env.JWT_SECRET);
+        std::string user_name = old_decoded_refresh_token.get_id();
 
         if (!tx.query_value<bool>(
                 std::format("SELECT COUNT(1) FROM users WHERE '{}' = ANY(refresh_tokens)",
-                            req_body.refresh_token))) {
+                            tx.esc(old_refresh_token)))) {
             res.set_content("Invalid refresh_token", "text/plain");
             res.status = 400;
             return;
         }
 
+        auto new_refresh_token = make_refresh_token(user_name, s.env.JWT_SECRET);
         scm::Response res_body {
-            .access_token = make_access_token(user_name, s.env.JWT_SECRET),
-            .refresh_token = make_refresh_token(user_name, s.env.JWT_SECRET)};
+            .access_token = make_access_token(user_name, s.env.JWT_SECRET)};
 
         tx.exec0(
             std::format("UPDATE users SET refresh_tokens = array_remove(refresh_tokens, "
                         "'{}') || ARRAY['{}'] "
                         "WHERE user_name = '{}'",
-                        req_body.refresh_token, res_body.refresh_token, user_name));
+                        tx.esc(old_refresh_token), tx.esc(new_refresh_token),
+                        tx.esc(user_name)));
 
         tx.commit();
 
-        res.set_content(static_cast<json>(res_body).dump(), "application/json");
-
         res.status = 200;
+        set_refresh_token_cookie(res, new_refresh_token);
+        res.set_content(static_cast<json>(res_body).dump(), "application/json");
     });
 }
 
-};  // namespace handlers
+};  // namespace methods

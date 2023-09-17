@@ -10,6 +10,7 @@
 
 #include "state.h"
 #include "utils/jwt.h"
+#include "utils/cookies.h"
 
 namespace schemas::log_in {
 
@@ -21,9 +22,8 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Request, user_name, password)
 
 struct Response {
     std::string access_token;
-    std::string refresh_token;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Response, access_token, refresh_token)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Response, access_token)
 
 };  // namespace schemas::log_in
 
@@ -47,7 +47,7 @@ void log_in(state::State& s) {
         }
         if (!tx.query_value<bool>(
                 std::format("SELECT COUNT(1) FROM users WHERE user_name = '{}'",
-                            req_body.user_name))) {
+                            tx.esc(req_body.user_name)))) {
             res.status = 400;
             res.body = "User with this user_name doesn't exist";
             return;
@@ -58,27 +58,28 @@ void log_in(state::State& s) {
             res.body = "Invalid password size";
             return;
         }
-        std::string hash = tx.query_value<std::string>(std::format(
-            "SELECT password FROM users WHERE user_name = '{}'", req_body.user_name));
+        std::string hash = tx.query_value<std::string>(
+            std::format("SELECT password FROM users WHERE user_name = '{}'",
+                        tx.esc(req_body.user_name)));
         if (!BCrypt::validatePassword(req_body.password, hash)) {
             res.status = 400;
             res.body = "Incorrect password";
             return;
         }
 
+        auto refresh_token = make_refresh_token(req_body.user_name, s.env.JWT_SECRET);
         scm::Response res_body {
-            .access_token = make_access_token(req_body.user_name, s.env.JWT_SECRET),
-            .refresh_token = make_refresh_token(req_body.user_name, s.env.JWT_SECRET)};
+            .access_token = make_access_token(req_body.user_name, s.env.JWT_SECRET)};
 
         tx.exec0(
             std::format("UPDATE users SET refresh_tokens = refresh_tokens || ARRAY['{}'] "
                         "WHERE user_name = '{}'",
-                        res_body.refresh_token, req_body.user_name));
+                        tx.esc(refresh_token), tx.esc(req_body.user_name)));
 
         // Cleanup
         auto refresh_tokens = tx.exec1(std::format(
             "SELECT refresh_tokens FROM users WHERE user_name = '{}'",
-            req_body.user_name))[0]
+            tx.esc(req_body.user_name)))[0]
                                   .as_array();
 
         auto item = refresh_tokens.get_next();
@@ -92,16 +93,15 @@ void log_in(state::State& s) {
                         std::format("UPDATE users SET refresh_tokens = "
                                     "array_remove(refresh_tokens, '{}') "
                                     "WHERE user_name = '{}'",
-                                    token, req_body.user_name));
+                                    tx.esc(token), tx.esc(req_body.user_name)));
                 }
             }
         }
-
         tx.commit();
 
-        res.set_content(static_cast<json>(res_body).dump(), "application/json");
-
         res.status = 200;
+        set_refresh_token_cookie(res, refresh_token); 
+        res.set_content(static_cast<json>(res_body).dump(), "application/json");
     });
 }
 

@@ -11,12 +11,13 @@ services:
   accounts-backend:
     build: accounts/backend
     ports:
-      - "8080:8080"
+      - "8081:8080"
     environment:
       POSTGRES_URI: postgres://accounts-backend:${POSTGRES_PASSWORD}@postgresdb:5432/accounts-backend
       HOST: 0.0.0.0
       PORT: 8080
       JWT_SECRET: ${JWT_SECRET}
+      ALLOWED_ORIGINS: '["http://localhost:8080"]'
     depends_on:
       - postgresdb
     
