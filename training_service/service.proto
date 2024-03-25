@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+service TrainingJournal {
+    rpc GetWorkouts (WorkoutsQuery) returns (Response);
+}
+
+message WorkoutsQuery {
+    optional int32 start_id = 1;
+    int32 count = 2;
+    OrderBy order_by = 3;
+}
+
+enum OrderBy {
+    CREATED_AT_TIMESTAMP = 0;
+    NAME = 1;
+}
