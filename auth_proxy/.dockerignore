@@ -1,5 +1,7 @@
-/venv
-/build
-/compile_commands.json
-/CMakeUserPresets.json
 /.cache
+/.clang-format
+/.devcontainer
+/.git
+/.gitignore
+/build
+/docker

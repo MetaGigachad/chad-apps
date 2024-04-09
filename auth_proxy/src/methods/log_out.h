@@ -2,7 +2,6 @@
 
 #include <httplib.h>
 
-#include <bcrypt/BCrypt.hpp>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <pqxx/pqxx>

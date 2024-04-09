@@ -2,7 +2,10 @@
 
 #include <httplib.h>
 
-#include <bcrypt/BCrypt.hpp>
+extern "C" {
+    #include <crypt.h>
+}
+#include <cstddef>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 #include <pqxx/pqxx>
@@ -71,7 +74,12 @@ void sign_up(state::State& s) {
             return;
         }
 
-        std::string hashed_password = BCrypt::generateHash(req_body.password);
+        crypt_data crypt_data {
+            .initialized = 0
+        };
+        crypt_gensalt_rn("$2b$", 8, NULL, 0, crypt_data.setting, sizeof(crypt_data.setting));
+        crypt_r(req_body.password.c_str(), crypt_data.setting, &crypt_data);
+        std::string hashed_password = crypt_data.output;
 
         auto refresh_token = make_refresh_token(req_body.user_name, s.env.JWT_SECRET);
         scm::Response res_body {

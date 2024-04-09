@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22.1)
 
-project(training-journal-backend)
+project(auth_proxy)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if(CMAKE_EXPORT_COMPILE_COMMANDS)
@@ -8,26 +8,18 @@ if(CMAKE_EXPORT_COMPILE_COMMANDS)
       ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
 endif()
 
-find_package(httplib REQUIRED)
-find_package(libpqxx REQUIRED)
-find_package(nlohmann_json REQUIRED)
-find_package(jwt-cpp REQUIRED)
-find_package(bcrypt CONFIG REQUIRED)
+find_package(nlohmann_json 3.11.3 REQUIRED)
+find_package(jwt-cpp 0.7.0 REQUIRED)
+find_package(libpqxx 7.9.0 REQUIRED)
+find_package(httplib 0.15.3 REQUIRED)
+find_library(libxcrypt crypt PATHS /usr/local/lib)
+find_package(ozo 0.0.1 REQUIRED)
+find_package(Boost 1.72.0 REQUIRED)
 
 add_executable(
   ${PROJECT_NAME}
-  src/main.cpp
-  src/state.h
-  src/utils/logging.h
-  src/utils/jwt.h
-  src/utils/cookies.h
-  src/server/pre_routing.h
-  src/server/options.h
-  src/methods/log_in.h
-  src/methods/log_out.h
-  src/methods/sign_up.h
-  src/methods/refresh.h)
+  src/main.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE src)
-target_link_libraries(
-  ${PROJECT_NAME} httplib::httplib libpqxx::pqxx nlohmann_json::nlohmann_json
-  jwt-cpp::jwt-cpp bcrypt::bcrypt)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${libxcrypt} jwt-cpp::jwt-cpp nlohmann_json::nlohmann_json libpqxx::pqxx httplib::httplib yandex::ozo Boost::boost)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Werror)

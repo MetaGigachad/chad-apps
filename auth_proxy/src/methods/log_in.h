@@ -2,107 +2,101 @@
 
 #include <httplib.h>
 
-#include <bcrypt/BCrypt.hpp>
+extern "C" {
+    #include <crypt.h>
+}
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 #include <pqxx/pqxx>
 #include <string>
+#include <format>
 
-#include "state.h"
-#include "utils/jwt.h"
+#include "common/state.h"
 #include "utils/cookies.h"
+#include "common/base_handler.h"
 
-namespace schemas::log_in {
+namespace gateway {
 
-struct Request {
-    std::string user_name;
+using json = nlohmann::json;
+
+struct TLoginRequest {
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(TLoginRequest, username, password)
+    std::string username;
     std::string password;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Request, user_name, password)
 
-struct Response {
+struct TLoginResponse {
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(TLoginResponse, access_token)
     std::string access_token;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Response, access_token)
 
-};  // namespace schemas::log_in
+class TLoginHandler : public TJsonHandler<TLoginHandler, TLoginRequest, TLoginResponse> {
+public:
+    TLoginHandler(const TState& state)
+        : TJsonHandler(state) {}
 
-namespace methods {
+    std::variant<TLoginResponse, TErrorResponse> Impl(const TLoginRequest& req) {
+        pqxx::work tx {*State_.DbConnection};
 
-void log_in(state::State& s) {
-    namespace scm = schemas::log_in;
-
-    using json = nlohmann::json;
-    using httplib::Request;
-    using httplib::Response;
-
-    s.svr.Post("/log_in", [&](const Request& req, Response& res) {
-        auto req_body = json::parse(req.body).get<scm::Request>();
-        pqxx::work tx {*s.postgres};
-
-        if (req_body.user_name.empty() || req_body.user_name.size() > 50) {
-            res.status = 400;
-            res.body = "Invalid user_name size";
-            return;
+        if (req.username.empty() || req.username.size() > 50) {
+            return TErrorResponse("Invalid username size");
         }
         if (!tx.query_value<bool>(
                 std::format("SELECT COUNT(1) FROM users WHERE user_name = '{}'",
-                            tx.esc(req_body.user_name)))) {
-            res.status = 400;
-            res.body = "User with this user_name doesn't exist";
-            return;
+                            tx.esc(req.username)))) {
+            return TErrorResponse("User with this user_name doesn't exist");
         }
 
-        if (req_body.password.empty() || req_body.password.size() > 50) {
-            res.status = 400;
-            res.body = "Invalid password size";
-            return;
+        if (req.password.empty() || req.password.size() > 50) {
+            return TErrorResponse("Invalid password size");
         }
         std::string hash = tx.query_value<std::string>(
             std::format("SELECT password FROM users WHERE user_name = '{}'",
-                        tx.esc(req_body.user_name)));
-        if (!BCrypt::validatePassword(req_body.password, hash)) {
-            res.status = 400;
-            res.body = "Incorrect password";
-            return;
+                        tx.esc(req.username)));
+
+        crypt_data crypt_data {
+            .initialized = 0
+        };
+        std::string new_hash = crypt_r(req.password.c_str(), hash.c_str() + hash.size() - 31, &crypt_data);
+
+        if (hash != new_hash) {
+            return TErrorResponse("Incorrect password");
         }
 
-        auto refresh_token = make_refresh_token(req_body.user_name, s.env.JWT_SECRET);
-        scm::Response res_body {
-            .access_token = make_access_token(req_body.user_name, s.env.JWT_SECRET)};
+        auto refresh_token = make_refresh_token(req.username, State_.Config().JwtSecret);
+        TLoginResponse res {
+            .access_token = make_access_token(req.username, State_.Config().JwtSecret)};
 
         tx.exec0(
             std::format("UPDATE users SET refresh_tokens = refresh_tokens || ARRAY['{}'] "
                         "WHERE user_name = '{}'",
-                        tx.esc(refresh_token), tx.esc(req_body.user_name)));
+                        tx.esc(refresh_token), tx.esc(req.username)));
 
         // Cleanup
         auto refresh_tokens = tx.exec1(std::format(
             "SELECT refresh_tokens FROM users WHERE user_name = '{}'",
-            tx.esc(req_body.user_name)))[0]
+            tx.esc(req.username)))[0]
                                   .as_array();
 
         auto item = refresh_tokens.get_next();
         while (item.first == pqxx::array_parser::juncture::string_value) {
             auto& token = item.second;
             try {
-                verify_refresh_token(token, s.env.JWT_SECRET);
+                verify_refresh_token(token, State_.Config().JwtSecret);
             } catch (jwt::error::token_verification_error& e) {
                 if (e == jwt::error::token_verification_error::token_expired) {
                     tx.exec0(
                         std::format("UPDATE users SET refresh_tokens = "
                                     "array_remove(refresh_tokens, '{}') "
                                     "WHERE user_name = '{}'",
-                                    tx.esc(token), tx.esc(req_body.user_name)));
+                                    tx.esc(token), tx.esc(req.username)));
                 }
             }
         }
         tx.commit();
 
-        res.status = 200;
-        set_refresh_token_cookie(res, refresh_token); 
-        res.set_content(static_cast<json>(res_body).dump(), "application/json");
-    });
-}
+        // set_refresh_token_cookie(res, refresh_token); 
+        return res;
+    }
+};
 
-};  // namespace methods
+}
