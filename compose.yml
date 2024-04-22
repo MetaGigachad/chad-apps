@@ -1,0 +1,68 @@
+services:
+  hydra:
+    image: oryd/hydra:v2.2.0
+    ports:
+      - "4444:4444" # Public port
+      - "4445:4445" # Admin port
+      - "5555:5555" # Port for hydra token user
+    command: serve -c /etc/config/hydra/hydra.yml all --dev
+    volumes:
+      - type: volume
+        source: hydra-sqlite
+        target: /var/lib/sqlite
+        read_only: false
+      - type: bind
+        source: ./deploy/hydra
+        target: /etc/config/hydra
+    environment:
+      - DSN=sqlite:///var/lib/sqlite/db.sqlite?_fk=true
+    restart: unless-stopped
+    depends_on:
+      - hydra-migrate
+  hydra-migrate:
+    image: oryd/hydra:v2.2.0
+    environment:
+      - DSN=sqlite:///var/lib/sqlite/db.sqlite?_fk=true
+    command: migrate -c /etc/config/hydra/hydra.yml sql -e --yes
+    volumes:
+      - type: volume
+        source: hydra-sqlite
+        target: /var/lib/sqlite
+        read_only: false
+      - type: bind
+        source: ./deploy/hydra
+        target: /etc/config/hydra
+    restart: on-failure
+  auth_app:
+    build: 
+      context: .
+      dockerfile: ./deploy/auth_app/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - auth_service
+  auth_service:
+    build: 
+      context: ./auth_service
+      dockerfile: ./deploy/auth_service/Dockerfile
+    restart: unless-stopped
+    environment:
+      HOST: 0.0.0.0
+      ORY_URL: http://hydra:4445
+      PG_CONFIG: host=auth_service_db user=postgres password=${AUTH_SERVICE_DB_PASSWORD}
+      OAUTH2_CLIENT_REDIRECT_URIS: http://localhost:3000/
+    depends_on:
+      - auth_service_db
+      - hydra
+  auth_service_db:
+    image: postgres:16.2
+    container_name: auth_service_db
+    shm_size: 128mb
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${AUTH_SERVICE_DB_PASSWORD}
+    volumes:
+      - ./deploy/auth_service_db:/docker-entrypoint-initdb.d
+volumes:
+  hydra-sqlite:

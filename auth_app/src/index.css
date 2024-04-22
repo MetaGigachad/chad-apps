@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.bg-chad {
+  background-image: url('https://qph.cf2.quoracdn.net/main-qimg-d10365c0d88404820cb52a5a91628b0d');
+}
+
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.bg-gradient {
+  background: linear-gradient(45deg, #CCCCFF, #9999FF);
+  background-size: 200% 200%;
+  animation: gradientAnimation 10s ease infinite;
+}
+
+.bg-gradient-dark {
+  background: linear-gradient(45deg, #000011, #000055);
+  background-size: 200% 200%;
+  animation: gradientAnimation 10s ease infinite;
+}
