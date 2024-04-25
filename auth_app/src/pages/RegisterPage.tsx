@@ -1,15 +1,16 @@
-import { Component } from "solid-js";
+import { Component, Show, createSignal } from "solid-js";
 import { PageBase } from "../components/PageBase";
 import { LineForm } from "../components/LineForm";
 import { PrimaryButton } from "../components/PrimaryButton";
 import { SecondaryButton } from "../components/SecondaryButton";
 
 export const RegisterPage: Component = () => {
-  const submitHandler = async (fields: { [key: string]: string }) => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const loginChallenge = queryParams.get("login_challenge");
+  const [password, setPassword] = createSignal("");
+  const [success, setSuccess] = createSignal(false);
+  const [conflict, setConflict] = createSignal(true);
 
-    const response = await fetch("http://localhost:3000/api/register", {
+  const submitHandler = async (fields: { [key: string]: string }) => {
+    const response = await fetch("/api/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -20,9 +21,8 @@ export const RegisterPage: Component = () => {
       }),
     });
     
-    const data = await response.text();
-    console.log(data);
-    console.log("success");
+    setSuccess(response.status === 200);
+    setConflict(response.status === 409);
   };
 
   return (
@@ -32,21 +32,21 @@ export const RegisterPage: Component = () => {
           {
             name: "username",
             label: "Username",
-            validator: (x) => (x.length === 0 ? "Empty" : ""),
+            validator: (x) => (x.length === 0 ? "Required" : (conflict() ? "Username is already taken" : "")),
             type: "text",
-            autocomplete: "email",
-          },
-          {
-            name: "email",
-            label: "Email",
-            validator: (x) => (x.length === 0 ? "Empty" : ""),
-            type: "email",
             autocomplete: "email",
           },
           {
             name: "password",
             label: "Password",
-            validator: (x) => (x.length === 0 ? "Empty" : ""),
+            validator: (x) => {setPassword(x); return x.length === 0 ? "Required" : ""},
+            type: "password",
+            autocomplete: "current-password",
+          },
+          {
+            name: "confirm-password",
+            label: "Confirm password",
+            validator: (x) => (x.length === 0 ? "Required" : (password() !== x ? "Doesn't match" : "")),
             type: "password",
             autocomplete: "current-password",
           },
@@ -55,10 +55,11 @@ export const RegisterPage: Component = () => {
       >
         <div class="flex justify-between">
           <PrimaryButton type="submit">Register</PrimaryButton>
-          <a href="/login">
-            <SecondaryButton type="button">Login</SecondaryButton>
-          </a>
+          <SecondaryButton onClick={(_) => window.location.pathname = "/login"} type="button">Login</SecondaryButton>
         </div>
+        <Show when={success()}>
+          <h3 class="mt-4 font-semibold text-center">Successfully registered!</h3>
+        </Show>
       </LineForm>
     </PageBase>
   );

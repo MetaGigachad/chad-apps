@@ -29,7 +29,7 @@ export const Input: Component<InputProps> = (props) => {
           {props.label}
         </label>
         <Show when={hasError()}>
-          <span class="ml-auto text-red-500">Empty</span>
+          <span class="ml-auto text-red-500">{props.error()}</span>
         </Show>
       </div>
       <input

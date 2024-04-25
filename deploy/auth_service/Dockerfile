@@ -1,7 +1,7 @@
 FROM golang:1.22.2 as build
 
 WORKDIR /app
-COPY . .
+COPY ./auth_service .
 ENV CGO_ENABLED=0
 RUN go build ./cmd/auth_service.go
 

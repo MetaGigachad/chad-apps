@@ -36,11 +36,12 @@ func init() {
 	}
 	if len(clients) == 1 {
 		client := clients[0]
-		if ClientId != nil && ClientId != client.ClientId {
+		if ClientId != nil && *ClientId != *client.ClientId {
 			log.Fatalf("OAuth2 client with name `%s` has id `%s`, but id `%s` was expected\n", ClientName, *client.ClientId, *ClientId)
 		}
 		ClientId = client.ClientId
 		log.Infof("Using OAuth2 client with name `%s` and id `%s`\n", ClientName, ClientId)
+		return
 	}
 
 	// Create new client
@@ -50,6 +51,7 @@ func init() {
 		client.SetClientId(*ClientId)
 	}
 	client.SetRedirectUris(env.OAuth2ClientRedirectUris)
+	client.SetSkipConsent(true)
 	resp, r, err := oauth2.CreateOAuth2Client(context.Background()).OAuth2Client(client).Execute()
 	if err != nil {
 		switch r.StatusCode {

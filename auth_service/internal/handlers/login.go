@@ -41,9 +41,9 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	if _, _, err := ory.OAuth2.GetOAuth2LoginRequest(context.Background()).LoginChallenge(req.LoginChallenge).Execute(); err != nil {
-		panic(err)
-	}
+	// if _, _, err := ory.OAuth2.GetOAuth2LoginRequest(context.Background()).LoginChallenge(req.LoginChallenge).Execute(); err != nil {
+	// 	panic(err)
+	// }
 
 	redirectTo, _, err := ory.OAuth2.AcceptOAuth2LoginRequest(context.Background()).LoginChallenge(req.LoginChallenge).AcceptOAuth2LoginRequest(client.AcceptOAuth2LoginRequest{
 		Subject: id,

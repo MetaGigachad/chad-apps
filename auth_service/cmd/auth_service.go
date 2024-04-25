@@ -34,11 +34,20 @@ func main() {
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}))
 
-	router.POST("/login", handlers.LoginHandler)
+	router.POST("/ping", func(ctx *gin.Context) {
+		ctx.String(http.StatusOK, "pong")
+	})
+
 	router.POST("/register", handlers.RegisterHandler)
 
+	router.POST("/startLogin", handlers.StartLoginHandler)
+	router.POST("/login", handlers.LoginHandler)
+	router.POST("/denyLogin", handlers.DenyLoginHandler)
+
+	router.POST("/consent", handlers.ConsentHandler)
+
 	log.Infof("Server listening on %s:%d...\n", env.Host, env.Port)
-	http.ListenAndServe(fmt.Sprintf("%s:%d", env.Host, env.Port), nil)
+	router.Run(fmt.Sprintf("%s:%d", env.Host, env.Port))
 }
 
 func GinLogrus(logger *log.Logger) gin.HandlerFunc {

@@ -5,6 +5,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { PageBg } from "./components/PageBg";
 import { RootPage } from "./pages/RootPage";
+import { ConsentPage } from "./pages/ConsentPage";
 
 const App: Component = () => {
   return (
@@ -13,6 +14,7 @@ const App: Component = () => {
         <Route path="/" component={RootPage} />
         <Route path="/login" component={LoginPage} />
         <Route path="/register" component={RegisterPage} />
+        <Route path="/consent" component={ConsentPage} />
         <Route
           path="/*"
           component={() => (

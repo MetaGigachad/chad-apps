@@ -9,10 +9,11 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var Pool pgxpool.Pool
+var Pool *pgxpool.Pool
 
 func init() {
-	Pool, err := pgxpool.New(context.Background(), env.PgConfig)
+	var err error
+	Pool, err = pgxpool.New(context.Background(), env.PgConfig)
 	if err != nil {
 		log.Fatal("Unable to connect to database:", err)
 	}
