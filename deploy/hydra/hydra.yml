@@ -1,13 +1,31 @@
+log:
+  level: debug
 serve:
   cookies:
     same_site_mode: Lax
+  public:
+    cors:
+      enabled: true
+      allowed_origins:
+        - https://localhost:8000
+      allowed_methods:
+        - POST
+        - GET
+        - PUT
+        - PATCH
+        - DELETE
+      allowed_headers:
+        - Authorization
+      exposed_headers:
+        - Content-Type
+
 
 urls:
   self:
     issuer: http://localhost:4444
-  consent: http://localhost:3000/consent
-  login: http://localhost:3000/login
-  logout: http://localhost:3000/logout
+  consent: https://localhost:7000/consent
+  login: https://localhost:7000/login
+  logout: https://localhost:7000/logout
 
 secrets:
   system:

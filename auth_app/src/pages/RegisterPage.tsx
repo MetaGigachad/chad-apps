@@ -7,7 +7,7 @@ import { SecondaryButton } from "../components/SecondaryButton";
 export const RegisterPage: Component = () => {
   const [password, setPassword] = createSignal("");
   const [success, setSuccess] = createSignal(false);
-  const [conflict, setConflict] = createSignal(true);
+  const [conflict, setConflict] = createSignal(false);
 
   const submitHandler = async (fields: { [key: string]: string }) => {
     const response = await fetch("/api/register", {
@@ -26,7 +26,7 @@ export const RegisterPage: Component = () => {
   };
 
   return (
-    <PageBase title="Become Chad">
+    <PageBase title="Become Chad" back={["< Login", (_) => window.location.pathname = "/login"]}>
       <LineForm
         fields={[
           {
@@ -53,9 +53,9 @@ export const RegisterPage: Component = () => {
         ]}
         onSubmit={submitHandler}
       >
-        <div class="flex justify-between">
+        <div class="flex justify-center">
           <PrimaryButton type="submit">Register</PrimaryButton>
-          <SecondaryButton onClick={(_) => window.location.pathname = "/login"} type="button">Login</SecondaryButton>
+          {/* <SecondaryButton onClick={(_) => window.location.pathname = "/login"} type="button">Login</SecondaryButton> */}
         </div>
         <Show when={success()}>
           <h3 class="mt-4 font-semibold text-center">Successfully registered!</h3>

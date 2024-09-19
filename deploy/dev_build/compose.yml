@@ -1,0 +1,68 @@
+services:
+  api_proxy:
+    image: nginx:1.27
+    volumes:
+      - "./api_proxy/nginx.conf:/etc/nginx/nginx.conf:ro"
+      - "./api_proxy/variables.conf.template:/etc/nginx/templates/10-variables.conf.template:ro"
+      - "./api_proxy/ssl:/etc/ssl:ro"
+    environment:
+      AUTH_FRONTEND_HOST: http://172.17.0.1:8003
+      AUTH_API_HOST: http://172.17.0.1:8004
+      AUTH_OAUTH2_HOST: http://172.17.0.1:4444
+      ONBOARDING_FRONTEND_HOST: http://172.17.0.1:8001
+      ONBOARDING_API_HOST: http://172.17.0.1:8002
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "7000:443"
+      - "8000:444"
+  hydra:
+    image: oryd/hydra:v2.2.0
+    # ports: 4444, 4445, 5555 - public, admin, hydra token user
+    ports:
+      - "4444:4444"
+      - "4445:4445"
+      - "5555:5555"
+    command: serve -c /etc/config/hydra/hydra.yml all --dev
+    volumes:
+      - "hydra-sqlite:/var/lib/sqlite"
+      - "../hydra:/etc/config/hydra"
+    environment:
+      - DSN=sqlite:///var/lib/sqlite/db.sqlite?_fk=true
+    depends_on:
+      - hydra-migrate
+  hydra-migrate:
+    image: oryd/hydra:v2.2.0
+    environment:
+      - DSN=sqlite:///var/lib/sqlite/db.sqlite?_fk=true
+    command: migrate -c /etc/config/hydra/hydra.yml sql -e --yes
+    volumes:
+      - "hydra-sqlite:/var/lib/sqlite"
+      - "../hydra:/etc/config/hydra"
+  # auth_api:
+  #   build: 
+  #     context: ../..
+  #     dockerfile: ./deploy/auth_service/Dockerfile
+  #     shm_size: 500mb
+  #   environment:
+  #     HOST: 0.0.0.0
+  #     PORT: 8000
+  #     ORY_URL: http://hydra:4445
+  #     PG_CONFIG: host=auth_service_db user=postgres password=${AUTH_SERVICE_DB_PASSWORD}
+  #     OAUTH2_CLIENT_REDIRECT_URIS: http://localhost:8000/callback
+  #     OAUTH2_CLIENT_ID: training_app
+  #     DEBUG: true
+  #   depends_on:
+  #     - auth_service_db
+  #     - hydra
+  auth_service_db:
+    image: postgres:16.2
+    shm_size: 128mb
+    environment:
+      POSTGRES_PASSWORD: ${AUTH_SERVICE_DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ../auth_service_db:/docker-entrypoint-initdb.d
+volumes:
+  hydra-sqlite:

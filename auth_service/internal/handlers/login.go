@@ -46,7 +46,7 @@ func LoginHandler(c *gin.Context) {
 	// }
 
 	redirectTo, _, err := ory.OAuth2.AcceptOAuth2LoginRequest(context.Background()).LoginChallenge(req.LoginChallenge).AcceptOAuth2LoginRequest(client.AcceptOAuth2LoginRequest{
-		Subject: id,
+		Subject: id + " " + req.Username,
 	}).Execute()
 	if err != nil {
 		panic(err)

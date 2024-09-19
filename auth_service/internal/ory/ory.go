@@ -40,7 +40,7 @@ func init() {
 			log.Fatalf("OAuth2 client with name `%s` has id `%s`, but id `%s` was expected\n", ClientName, *client.ClientId, *ClientId)
 		}
 		ClientId = client.ClientId
-		log.Infof("Using OAuth2 client with name `%s` and id `%s`\n", ClientName, ClientId)
+		log.Infof("Using OAuth2 client with name `%s` and id `%s`\n", ClientName, *ClientId)
 		return
 	}
 
@@ -52,6 +52,11 @@ func init() {
 	}
 	client.SetRedirectUris(env.OAuth2ClientRedirectUris)
 	client.SetSkipConsent(true)
+	client.SetGrantTypes([]string{"authorization_code", "refresh_token"})
+	client.SetScope("openid,offline")
+	client.SetResponseTypes([]string{"token", "code", "id_token"})
+	client.SetTokenEndpointAuthMethod("none")
+    client.SetClientSecret("secret")
 	resp, r, err := oauth2.CreateOAuth2Client(context.Background()).OAuth2Client(client).Execute()
 	if err != nil {
 		switch r.StatusCode {
@@ -61,6 +66,6 @@ func init() {
 			log.Fatalf("Error when calling `OAuth2Api.CreateOAuth2Client`: %v\nFull HTTP response: %v\n", err, r)
 		}
 	}
-	log.Infof("Created new oAuth2Client named `%s` with id: %s", ClientName, *resp.ClientId)
+	log.Infof("Created new oAuth2Client named `%s` with id: %s", ClientName, resp.ClientId)
 	ClientId = resp.ClientId
 }

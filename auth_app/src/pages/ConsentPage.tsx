@@ -22,6 +22,7 @@ export const ConsentPage: Component = () => {
     if (contentType && contentType.indexOf("application/json") !== -1) {
       const body = await response.json();
       window.location = body["redirect_to"];
+      return
     }
 
     setLoading(false);

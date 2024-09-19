@@ -50,7 +50,7 @@ export const LineForm: Component<LineFormProps> = (props) => {
     {},
   );
 
-  const handleSubmit = (e: SubmitEvent) => {
+  const handleSubmit = async (e: SubmitEvent) => {
     e.preventDefault();
     let hasError = props.fields.reduce((hasError, field) => {
       const error = field.validator(formData[field.name].value());
@@ -60,13 +60,17 @@ export const LineForm: Component<LineFormProps> = (props) => {
     if (hasError) {
       return;
     }
-    props.onSubmit(props.fields.reduce(
+    await props.onSubmit(props.fields.reduce(
       (obj: { [key: string]: string }, field) => {
         obj[field.name] = formData[field.name].value();
         return obj;
       },
       {},
     ));
+    props.fields.forEach((field) => {
+      const error = field.validator(formData[field.name].value());
+      formData[field.name].setError(error);
+    });
   };
 
   const handleKeyPressFactory = (ref: Accessor<HTMLElement | undefined>) => {

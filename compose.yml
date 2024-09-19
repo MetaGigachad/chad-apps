@@ -58,8 +58,8 @@ services:
       HOST: 0.0.0.0
       ORY_URL: http://hydra:4445
       PG_CONFIG: host=auth_service_db user=postgres password=${AUTH_SERVICE_DB_PASSWORD}
-      OAUTH2_CLIENT_REDIRECT_URIS: http://localhost:3000/
-      OAUTH2_CLIENT_ID: training_journal
+      OAUTH2_CLIENT_REDIRECT_URIS: http://localhost:4000/callback
+      OAUTH2_CLIENT_ID: training_app
       DEBUG: true
     networks:
       - auth_service

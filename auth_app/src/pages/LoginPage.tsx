@@ -6,6 +6,7 @@ import { SecondaryButton } from "../components/SecondaryButton";
 
 export const LoginPage: Component = () => {
   const [loading, setLoading] = createSignal(true);
+  const [userExists, setUserExists] = createSignal(true);
 
   onMount(async () => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -43,9 +44,15 @@ export const LoginPage: Component = () => {
         password: fields["password"],
         login_challenge: loginChallenge,
       }),
-    }).then((data) => data.json());
-
-    window.location = response["redirect_to"];
+    });
+    
+    setUserExists(response.status !== 404);
+    
+    const body = await response.json();
+    if (body["redirect_to"] === undefined) {
+      return
+    }
+    window.location = body["redirect_to"];
   };
 
   const denyHandler = async (_: MouseEvent) => {
@@ -61,19 +68,24 @@ export const LoginPage: Component = () => {
         login_challenge: loginChallenge,
       }),
     }).then((data) => data.json());
+    
+    if (response["redirect_to"] === undefined) {
+      console.log(response);
+      return
+    }
 
     window.location = response["redirect_to"];
   };
 
   return (
     <Show when={!loading()} fallback={<div class="loader"></div>}>
-      <PageBase title="Chad Auth">
+      <PageBase title="Chad Auth" back={["< Back", denyHandler]}>
         <LineForm
           fields={[
             {
               name: "username",
               label: "Username",
-              validator: (x) => (x.length === 0 ? "Required" : ""),
+              validator: (x) => (x.length === 0 ? "Required" : (!userExists() ? "User doesn't exist": "")),
               cache: true,
               type: "text",
               autocomplete: "username",
@@ -90,9 +102,6 @@ export const LoginPage: Component = () => {
         >
           <div class="flex justify-between">
             <PrimaryButton type="submit">Login</PrimaryButton>
-            <PrimaryButton onClick={denyHandler} type="button">
-              Deny
-            </PrimaryButton>
             <SecondaryButton
               onClick={(_) => (window.location.pathname = "/register")}
               type="button"
