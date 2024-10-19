@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+.squada-one-regular {
+  font-family: "Squada One", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
 .bg-chad {
   background-image: url('https://qph.cf2.quoracdn.net/main-qimg-d10365c0d88404820cb52a5a91628b0d');
 }
@@ -49,7 +55,7 @@
   left: 0;
   border-radius: inherit;
   background: currentColor;
-  animation: l3 1s infinite linear;
+  animation: l3 1s infinite ease-in-out;
 }
 @keyframes l3 {
     50% {left:100%;transform: translateX(calc(-100% - 4px))}

@@ -244,3 +244,8 @@ func WithColor() Option {
 		h.colorize = true
 	}
 }
+
+func InitLogger() {
+	logger := slog.New(NewHandler(&slog.HandlerOptions{AddSource: true, Level: slog.LevelDebug.Level()}))
+	slog.SetDefault(logger)
+}

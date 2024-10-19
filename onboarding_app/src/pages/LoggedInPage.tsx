@@ -1,7 +1,9 @@
+import { useNavigate } from "@solidjs/router";
 import { UserContext } from "../state/UserContext";
 import { For, useContext } from "solid-js";
 
 export function LoggedInPage() {
+  const navigate = useNavigate();
   const user = useContext(UserContext)!;
   return (
     <div class="flex justify-center items-center min-h-screen">
@@ -18,7 +20,7 @@ export function LoggedInPage() {
             {(meta, _) => (
               <button
                 class="text-xl hover:dark:font-semibold underline"
-                onClick={(_) => (window.location.pathname = meta.route)}
+                onClick={() => navigate(meta.route)}
               >
                 {"> " + meta.label}
               </button>

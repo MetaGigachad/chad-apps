@@ -1,0 +1,89 @@
+services:
+  gateway:
+    image: nginx:1.27
+    volumes:
+      - "../../build/gateway/nginx.conf:/etc/nginx/nginx.conf:ro"
+      - "../../build/gateway/variables.conf.template:/etc/nginx/templates/10-variables.conf.template:ro"
+      - "../../build/gateway/ssl:/etc/ssl:ro"
+    environment:
+      AUTH_FRONTEND_HOST: http://auth_app:80
+      AUTH_API_HOST: http://auth_service:80
+      AUTH_OAUTH2_HOST: http://hydra:4444
+      ONBOARDING_FRONTEND_HOST: http://onboarding_app:80
+      ONBOARDING_API_HOST: http://onboarding_service:80
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "443:443"
+      - "80:80"
+
+  hydra:
+    image: oryd/hydra:v2.2.0
+    # ports: 4444, 4445, 5555 - public, admin, hydra token user
+    # ports:
+    #   - "4444:4444"
+    #   - "4445:4445"
+    #   - "5555:5555"
+    command: serve -c /etc/config/hydra/hydra.yml all --dev
+    volumes:
+      - "hydra-sqlite:/var/lib/sqlite"
+      - "../../build/hydra:/etc/config/hydra"
+    environment:
+      - DSN=sqlite:///var/lib/sqlite/db.sqlite?_fk=true
+      - URLS_CONSENT=${AUTH_FRONTEND_URL}/consent
+      - URLS_LOGIN=${AUTH_FRONTEND_URL}/login
+      - URLS_LOGOUT=${AUTH_FRONTEND_URL}/logout
+      - URLS_SELF_ISSUER=${AUTH_FRONTEND_URL}
+    depends_on:
+      - hydra-migrate
+  hydra-migrate:
+    image: oryd/hydra:v2.2.0
+    environment:
+      - DSN=sqlite:///var/lib/sqlite/db.sqlite?_fk=true
+    command: migrate -c /etc/config/hydra/hydra.yml sql -e --yes
+    volumes:
+      - "hydra-sqlite:/var/lib/sqlite"
+      - "../../build/hydra:/etc/config/hydra"
+
+  auth_app:
+    build:
+      context: ../../..
+      dockerfile: ./deploy/build/auth_app/Dockerfile
+      shm_size: '2gb'
+    image: ${DOCKERHUB_REPO}:chad_apps-auth_app-latest
+  auth_service:
+    build:
+      context: ../../..
+      dockerfile: ./deploy/build/auth_service/Dockerfile
+    image: ${DOCKERHUB_REPO}:chad_apps-auth_service-latest
+    environment:
+      ORY_URL: http://hydra:4445
+      OAUTH2_CLIENT_ID: ${OAUTH2_CLIENT_ID}
+      OAUTH2_CLIENT_REDIRECT_URIS: ${OAUTH2_CLIENT_REDIRECT_URIS}
+      PG_CONFIG: host=auth_service_db user=postgres password=${AUTH_SERVICE_DB_PASSWORD}
+  auth_service_db:
+    image: postgres:16.2
+    shm_size: 128mb
+    environment:
+      POSTGRES_PASSWORD: ${AUTH_SERVICE_DB_PASSWORD}
+    volumes:
+      - ../../build/auth_service_db:/docker-entrypoint-initdb.d:ro
+
+  onboarding_app:
+    build:
+      context: ../../..
+      dockerfile: ./deploy/build/onboarding_app/Dockerfile
+      args:
+        AUTH_FRONTEND_URL: ${AUTH_FRONTEND_URL}
+    image: ${DOCKERHUB_REPO}:chad_apps-onboarding_app-latest
+  onboarding_service:
+    build:
+      context: ../../..
+      dockerfile: ./deploy/build/onboarding_service/Dockerfile
+      shm_size: '2gb'
+    image: ${DOCKERHUB_REPO}:chad_apps-onboarding_service-latest
+    volumes:
+      - ../../build/onboarding_service/config:/root/app/config:ro
+
+volumes:
+  hydra-sqlite:

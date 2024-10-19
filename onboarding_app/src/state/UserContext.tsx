@@ -1,3 +1,4 @@
+import { useNavigate } from "@solidjs/router";
 import base64url from "base64url";
 import { Component, ParentProps, createSignal, onMount } from "solid-js";
 import { createContext } from "solid-js";
@@ -52,17 +53,16 @@ export function UserProvider(props: ParentProps) {
     }
     setUser("loggedIn", false);
     setUser("authData", {});
-    window.location.assign("/");
   }
 
   async function getToken() {
     localStorage.setItem(localStoragePrefix + "/loggingIn", "false");
-    const response = await fetch("http://localhost:4444/oauth2/token", {
+    const response = await fetch("/oauth2/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
         grant_type: "authorization_code",
-        client_id: "training_app",
+        client_id: "onboarding_app",
         redirect_uri: window.location.origin.concat("/plans"),
         code_verifier: localStorage.getItem(localStoragePrefix + "/verifier")!,
         code: new URLSearchParams(window.location.search).get("code")!,
@@ -75,9 +75,8 @@ export function UserProvider(props: ParentProps) {
 
     const authData = await response.json();
     localStorage.setItem(localStoragePrefix + "/data", JSON.stringify(authData));
-    setUser("loggedIn", true);
     setUser("authData", authData);
-    window.location.assign("/plans");
+    setUser("loggedIn", true);
   }
 
   return (
@@ -99,10 +98,10 @@ function randomString(length: number) {
 };
 
 async function makeAuthUrl(codeVerifier: string, state: string) {
-  return `https://localhost:7000/oauth2/auth?`.concat(
+  return import.meta.env.VITE_AUTH_FRONTEND_URL + `/oauth2/auth?`.concat(
     new URLSearchParams({
       response_type: "code",
-      client_id: "training_app",
+      client_id: "onboarding_app",
       redirect_uri: window.location.origin.concat("/plans"),
       code_challenge: base64url.encode(
         await crypto.subtle.digest(

@@ -1,32 +1,41 @@
-import type { Component } from "solid-js";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { UserProvider } from "./contexts/UserContext";
 import { Route, Router } from "@solidjs/router";
-import { PageBg } from "./components/PageBg";
-import { RootPage } from "./pages/RootPage";
-import { CallbackPage } from "./pages/CallbackPage";
-import { AddWorkoutPage } from "./pages/AddWokoutPage";
-import { NotFoundPage } from "./pages/NotFoundPage";
-import { HistoryPage } from "./pages/HistoryPage";
-import { StatisticsPage } from "./pages/StatisticsPage";
-import { DarkModeState } from "./state/DarkModeState";
-import { AuthState } from "./state/AuthState";
+import { Layout } from "./components/layout";
+import { Nav } from "./components/nav";
+import { WorkoutsPageMain } from "./components/workouts";
+import { ViewportProvider } from "./contexts/ViewportContext";
 
-const App: Component = () => {
+export default function App() {
+  return (
+    <ViewportProvider>
+      <ThemeProvider>
+        <UserProvider>
+          <Router root={Layout}>
+            <Route path="/train" component={TrainPageMain} />
+            <Route path="/workouts" component={WorkoutsPageMain} />
+            <Route path="/logs" component={LogsPageMain} />
+          </Router>
+        </UserProvider>
+      </ThemeProvider>
+    </ViewportProvider>
+  );
+}
+
+function TrainPageMain() {
   return (
     <>
-      <DarkModeState />
-      <AuthState />
-      <PageBg>
-        <Router>
-          <Route path="/" component={RootPage} />
-          <Route path="/addWorkout" component={AddWorkoutPage} />
-          <Route path="/history" component={HistoryPage} />
-          <Route path="/statistics" component={StatisticsPage} />
-          <Route path="/callback" component={CallbackPage} />
-          <Route path="/*" component={NotFoundPage} />
-        </Router>
-      </PageBg>
+      <Nav page="train" />
+      <main class="w-auto self-stretch"></main>
     </>
   );
-};
+}
 
-export default App;
+function LogsPageMain() {
+  return (
+    <>
+      <Nav page="logs" />
+      <main class="w-auto self-stretch"></main>
+    </>
+  );
+}

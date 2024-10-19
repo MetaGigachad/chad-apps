@@ -1,8 +1,9 @@
+import { useNavigate } from "@solidjs/router";
 import { Header } from "../components/Header";
 import { Button, NavBar } from "../components/NavBar";
 import { EditorContext } from "../state/EditorContext";
 import { UserContext } from "../state/UserContext";
-import { apiFetch, sleep } from "../utils";
+import { apiFetch, capitalizeObject, sleep } from "../utils";
 import {
   For,
   JSX,
@@ -86,6 +87,8 @@ export function PlansList() {
 }
 
 export function Plan(props: { plan: Plan; updatePlans: () => Promise<void> }) {
+  const navigate = useNavigate();
+
   const [showControls, setShowControls] = createSignal(false);
   const [showDeployOverlay, setShowDeployOverlay] = createSignal(false);
   const user = useContext(UserContext)!;
@@ -116,7 +119,7 @@ export function Plan(props: { plan: Plan; updatePlans: () => Promise<void> }) {
         onMouseLeave={(_) => setShowControls(false)}
         onClick={async () => {
           await editor.loadPlan(props.plan.textId, props.plan.name);
-          window.location.assign("/editPlan");
+          navigate("/editPlan");
         }}
       >
         <div class="flex-auto text-start pl-2">{props.plan.name}</div>
@@ -202,7 +205,7 @@ export function NewPlanOverlay(props: {
     }
     const ok = await apiFetch(user, "/plans", {
       method: "POST",
-      body: JSON.stringify(plan),
+      body: JSON.stringify(capitalizeObject(plan)),
     }).then((res) => res.ok);
     if (ok) {
       await props.onCreate();

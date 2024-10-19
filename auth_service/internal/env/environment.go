@@ -25,13 +25,13 @@ func init() {
 
 	host := os.Getenv("HOST")
 	if host == "" {
-		host = "localhost"
+		host = "0.0.0.0"
 	}
 	Host = host
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		Port = 8080
+		Port = 80
 	} else {
 		val, err := strconv.ParseUint(port, 10, 16)
 		if err != nil {

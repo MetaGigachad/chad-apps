@@ -1,3 +1,4 @@
+import { useNavigate } from "@solidjs/router";
 import { Component, For } from "solid-js";
 
 export enum Button {
@@ -11,6 +12,7 @@ export interface NavBarProps {
 }
 
 export const NavBar: Component<NavBarProps> = (props) => {
+  const navigate = useNavigate();
   return (
     <div class="ml-6 flex min-w-56 flex-col gap-1 place-self-start rounded-2xl bg-gray-100 p-4 text-xl text-gray-600 dark:bg-gray-800 dark:text-gray-200">
       <For
@@ -27,7 +29,7 @@ export const NavBar: Component<NavBarProps> = (props) => {
               "dark:bg-gray-200 dark:text-gray-800": props.selected === meta.id,
               "transition hover:dark:bg-gray-600": props.selected !== meta.id,
             }}
-            onClick={(_) => window.location.pathname = meta.route}
+            onClick={() => navigate(meta.route)}
           >
             <div class="material-symbols-outlined hover:text place-self-center text-3xl">
               {meta.icon}

@@ -2,6 +2,7 @@ package pg
 
 import (
 	"context"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -18,9 +19,15 @@ func init() {
 		log.Fatal("Unable to connect to database:", err)
 	}
 
-	err = Pool.Ping(context.Background())
-	if err != nil {
-		log.Fatal("Error pinging database:", err)
-	}
+    log.Info("Waiting for successful db ping...")
+    for {
+        time.Sleep(time.Second)
+        err = Pool.Ping(context.Background())
+        if err != nil {
+            log.Debug("Unsuccessful db ping")
+        } else {
+            break
+        }
+    }
 	log.Info("Created connection pool to database with config:", Pool.Config())
 }

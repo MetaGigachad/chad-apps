@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/MetaGigachad/chad-apps/auth_service/internal/env"
@@ -46,8 +49,37 @@ func main() {
 
 	router.POST("/consent", handlers.ConsentHandler)
 
-	log.Infof("Server listening on %s:%d...\n", env.Host, env.Port)
-	router.Run(fmt.Sprintf("%s:%d", env.Host, env.Port))
+	StartServer(router, fmt.Sprintf("%s:%d", env.Host, env.Port))
+}
+
+func StartServer(router *gin.Engine, addr string) {
+	srv := &http.Server{
+		Addr:    addr,
+		Handler: router,
+	}
+
+	go func() {
+        log.Infof("Server listening on %s...\n", addr)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+
+    // Graceful shutdown
+    ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+    <-ctx.Done()
+    stop()
+
+    log.Info("Starting graceful shutdown")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+    log.Info("Closing postgres pool ...")
+    pg.Pool.Close()
+	log.Info("Shutdown Server ...")
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("Server Shutdown:", err)
+	}
+	log.Info("Server shutdown complete")
 }
 
 func GinLogrus(logger *log.Logger) gin.HandlerFunc {

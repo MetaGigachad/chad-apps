@@ -3,6 +3,7 @@ package ory
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/MetaGigachad/chad-apps/auth_service/internal/env"
 	ory "github.com/ory/client-go"
@@ -26,11 +27,21 @@ func init() {
 	oauth2 := ory.NewAPIClient(configuration).OAuth2API
 	OAuth2 = oauth2
 
+
 	// Try fetching existing client
-	clients, r, err := oauth2.ListOAuth2Clients(context.Background()).ClientName(ClientName).Execute()
-	if err != nil {
-		log.Fatalf("Error when calling `AdminApi.ListOAuth2Clients`: %v\nFull HTTP response: %v\n", err, r)
-	}
+    log.Info("Waiting for oauth2...")
+    var clients []ory.OAuth2Client 
+    for {
+        var r *http.Response
+        var err error
+        time.Sleep(time.Second)
+        clients, r, err = oauth2.ListOAuth2Clients(context.Background()).ClientName(ClientName).Execute()
+        if err != nil {
+            log.Debug("Error when calling `AdminApi.ListOAuth2Clients`: %v\nFull HTTP response: %v\n", err, r)
+        } else {
+            break
+        }
+    }
 	if len(clients) > 1 {
 		log.Fatalf("Unexpected amount of oauth2 clients with name `%s`: %d\n", ClientName, len(clients))
 	}

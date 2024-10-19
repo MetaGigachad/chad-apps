@@ -2,8 +2,11 @@ import { Component } from "solid-js";
 import { PageBase } from "../components/PageBase";
 import { PrimaryButton } from "../components/PrimaryButton";
 import { SecondaryButton } from "../components/SecondaryButton";
+import { useNavigate } from "@solidjs/router";
 
 export const RootPage: Component = () => {
+  const navigate = useNavigate();
+
   return (
     <PageBase title="Welcome to Chad Auth">
       <h2 class="mb-4">
@@ -13,12 +16,8 @@ export const RootPage: Component = () => {
         Try us out!
       </h2>
       <div class="flex justify-between">
-        <a href="/login">
-          <PrimaryButton type="button">Login</PrimaryButton>
-        </a>
-        <a href="/register">
-          <SecondaryButton type="button">Register</SecondaryButton>
-        </a>
+        <PrimaryButton type="button" onClick={() => navigate("/login")}>Login</PrimaryButton>
+        <SecondaryButton type="button" onClick={() => navigate("/register")}>Register</SecondaryButton>
       </div>
     </PageBase>
   );

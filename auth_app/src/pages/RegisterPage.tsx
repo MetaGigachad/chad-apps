@@ -3,8 +3,11 @@ import { PageBase } from "../components/PageBase";
 import { LineForm } from "../components/LineForm";
 import { PrimaryButton } from "../components/PrimaryButton";
 import { SecondaryButton } from "../components/SecondaryButton";
+import { useNavigate } from "@solidjs/router";
 
 export const RegisterPage: Component = () => {
+  const navigate = useNavigate();
+
   const [password, setPassword] = createSignal("");
   const [success, setSuccess] = createSignal(false);
   const [conflict, setConflict] = createSignal(false);
@@ -26,7 +29,7 @@ export const RegisterPage: Component = () => {
   };
 
   return (
-    <PageBase title="Become Chad" back={["< Login", (_) => window.location.pathname = "/login"]}>
+    <PageBase title="Become Chad" back={["< Login", () => navigate("/login")]}>
       <LineForm
         fields={[
           {

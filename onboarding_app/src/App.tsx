@@ -1,6 +1,6 @@
 import { PageBg } from "./components/PageBg";
-import { EditPlanPage } from "./pages/EditPlanPage";
 import { DeploymentsPage } from "./pages/DeploymentsPage";
+import { EditPlanPage } from "./pages/EditPlanPage";
 import { LoggedInPage } from "./pages/LoggedInPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { NotLoggedInPage } from "./pages/NotLoggedInPage";
@@ -27,21 +27,23 @@ export default function App() {
 function AppRouter() {
   const user = useContext(UserContext)!;
   return (
-    <Show
-      when={user.loggedIn}
-      fallback={
-        <Router>
-          <Route path="/" component={NotLoggedInPage} />
-        </Router>
-      }
-    >
-      <Router>
-        <Route path="/" component={LoggedInPage} />
-        <Route path="/editPlan" component={EditPlanPage} />
-        <Route path="/plans" component={PlansPage} />
-        <Route path="/deployments" component={DeploymentsPage} />
-        <Route path="/*" component={NotFoundPage} />
-      </Router>
-    </Show>
+    <Router>
+      <Show
+        when={user.loggedIn}
+        fallback={
+          <>
+            <Route path="/*" component={NotLoggedInPage} />
+          </>
+        }
+      >
+        <>
+          <Route path="/" component={LoggedInPage} />
+          <Route path="/editPlan" component={EditPlanPage} />
+          <Route path="/plans" component={PlansPage} />
+          <Route path="/deployments" component={DeploymentsPage} />
+          <Route path="/*" component={NotFoundPage} />
+        </>
+      </Show>
+    </Router>
   );
 }

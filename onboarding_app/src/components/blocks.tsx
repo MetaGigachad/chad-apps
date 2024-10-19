@@ -74,7 +74,7 @@ export const Plan: Component = () => {
     setDefaultDays(minDays);
   });
 
-  createEffect(() => {
+  onMount(() => {
     if (editor.plan !== undefined) {
       setBlocks(editor.plan.blocks.map((x) => createStore(x)));
     }
