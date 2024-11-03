@@ -32,6 +32,17 @@ func MakeJsonAPI() jsoniter.API {
 	return json
 }
 
+type FrontendConfig struct {
+    OAuth2 FrontendConfigOAuth2
+}
+
+type FrontendConfigOAuth2 struct {
+    AuthUrl string
+    TokenUrl string
+    ClientId string
+    RedirectUri string
+}
+
 type Plan struct {
     TextId string
     Name string

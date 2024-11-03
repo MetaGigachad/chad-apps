@@ -1,0 +1,7 @@
+services:
+    pg_service_template-container:
+        entrypoint:
+          - ./tests/run_as_user.sh
+          - /bin/bash
+          - -c
+          - "while true; do sleep 10; done"

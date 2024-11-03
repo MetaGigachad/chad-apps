@@ -10,12 +10,6 @@ import (
 type Config struct {
 	Bot struct {
 		Token   string `mapstructure:"token"`
-		WebHook struct {
-			HostUrl    string `mapstructure:"host_url"`
-			ListenHost string `mapstructure:"listen_host"`
-			ListenPort string `mapstructure:"listen_port"`
-		} `mapstructure:"webhook"`
-		AdminIds []int64 `mapstructure:"admin_ids"`
 	} `mapstructure:"bot"`
 	Database struct {
 		Path string `mapstructure:"path"`
@@ -23,10 +17,19 @@ type Config struct {
 	HttpAPI struct {
 		Host string `mapstructure:"host"`
 		Port string `mapstructure:"port"`
+        PathPrefix string `mapstructure:"path_prefix"`
 	} `mapstructure:"http_api"`
 	Ory struct {
 		Url string `mapstructure:"url"`
 	} `mapstructure:"ory"`
+    FrontendConfig struct {
+        OAuth2 struct {
+            AuthUrl string `mapstructure:"auth_url"`
+            TokenUrl string `mapstructure:"token_url"`
+            ClientId string `mapstructure:"client_id"`
+            RedirectUri string `mapstructure:"redirect_uri"`
+        } `mapstructure:"oauth2"`
+    } `mapstructure:"frontend_config"`
 }
 
 func LoadConfig() Config {

@@ -2,81 +2,63 @@ package ory
 
 import (
 	"context"
-	"net/http"
-	"time"
 
-	"github.com/MetaGigachad/chad-apps/auth_service/internal/env"
+	"github.com/MetaGigachad/chad-apps/auth_service/internal/config"
+	. "github.com/MetaGigachad/chad-apps/libraries/go_common/pkg/log"
+	. "github.com/MetaGigachad/chad-apps/libraries/go_common/pkg/utils"
 	ory "github.com/ory/client-go"
-	log "github.com/sirupsen/logrus"
 )
 
-var OAuth2 ory.OAuth2API
-var ClientName string
-var ClientId *string
-
-func init() {
-	ClientName = env.OAuth2ClientName
-	ClientId = env.OAuth2ClientId
-
-	configuration := ory.NewConfiguration()
-	configuration.Servers = []ory.ServerConfiguration{
-		{
-			URL: env.OryUrl,
-		},
-	}
-	oauth2 := ory.NewAPIClient(configuration).OAuth2API
-	OAuth2 = oauth2
-
-
-	// Try fetching existing client
-    log.Info("Waiting for oauth2...")
-    var clients []ory.OAuth2Client 
-    for {
-        var r *http.Response
-        var err error
-        time.Sleep(time.Second)
-        clients, r, err = oauth2.ListOAuth2Clients(context.Background()).ClientName(ClientName).Execute()
-        if err != nil {
-            log.Debug("Error when calling `AdminApi.ListOAuth2Clients`: %v\nFull HTTP response: %v\n", err, r)
-        } else {
-            break
-        }
+func NewHydraAdminClient(config *config.Config) *ory.APIClient {
+	clientConfig := ory.NewConfiguration()
+    if config.FeatureFlags.OryProxyHeaders {
+        clientConfig.AddDefaultHeader("X-Forwarded-Proto", "https")
     }
-	if len(clients) > 1 {
-		log.Fatalf("Unexpected amount of oauth2 clients with name `%s`: %d\n", ClientName, len(clients))
-	}
-	if len(clients) == 1 {
-		client := clients[0]
-		if ClientId != nil && *ClientId != *client.ClientId {
-			log.Fatalf("OAuth2 client with name `%s` has id `%s`, but id `%s` was expected\n", ClientName, *client.ClientId, *ClientId)
-		}
-		ClientId = client.ClientId
-		log.Infof("Using OAuth2 client with name `%s` and id `%s`\n", ClientName, *ClientId)
-		return
-	}
+	clientConfig.Servers = []ory.ServerConfiguration{{
+        URL: config.Ory.AdminUrl,
+	}}
+	return ory.NewAPIClient(clientConfig)
+}
 
-	// Create new client
-	client := *ory.NewOAuth2Client()
-	client.SetClientName(ClientName)
-	if ClientId != nil {
-		client.SetClientId(*ClientId)
-	}
-	client.SetRedirectUris(env.OAuth2ClientRedirectUris)
-	client.SetSkipConsent(true)
-	client.SetGrantTypes([]string{"authorization_code", "refresh_token"})
-	client.SetScope("openid,offline")
-	client.SetResponseTypes([]string{"token", "code", "id_token"})
-	client.SetTokenEndpointAuthMethod("none")
-    client.SetClientSecret("secret")
-	resp, r, err := oauth2.CreateOAuth2Client(context.Background()).OAuth2Client(client).Execute()
-	if err != nil {
-		switch r.StatusCode {
-		case http.StatusConflict:
-			log.Fatalf("Conflict when creating oAuth2Client: %v\n", err)
-		default:
-			log.Fatalf("Error when calling `OAuth2Api.CreateOAuth2Client`: %v\nFull HTTP response: %v\n", err, r)
-		}
-	}
-	log.Infof("Created new oAuth2Client named `%s` with id: %s", ClientName, resp.ClientId)
-	ClientId = resp.ClientId
+func WaitAvaliability(hydra *ory.APIClient) {
+    Log.Info("Waiting for OAuth2Admin API avaliablity...")
+    ExpRetry(func() error {
+        _, _, err := hydra.MetadataAPI.GetVersion(context.Background()).Execute()
+        return err
+    })
+}
+
+func SyncClients(config *config.Config, oauth2 ory.OAuth2API) {
+    Log.Info("Syncing OAuth2 clients...")
+    for _, clientConfig := range config.Ory.Clients {
+        syncClient(&clientConfig, oauth2)
+    }
+    Log.Info("Finished syncing OAuth2 clients")
+}
+
+func syncClient(clientConfig *config.OAuth2ClientConfig, oauth2 ory.OAuth2API) {
+    client, res, err := oauth2.GetOAuth2Client(context.Background(), clientConfig.Id).Execute()
+    if res.StatusCode != 404 && err != nil {
+        Log.Fatalw("Error checking client existance", "client", clientConfig, "error", err)
+    }
+    if client != nil {
+        Log.Debugw("Found OAuth2 client", "Id", *client.ClientId, "Name", *client.ClientName)
+        return
+    }
+    createClient(clientConfig, oauth2)
+}
+
+func createClient(clientConfig *config.OAuth2ClientConfig, oauth2 ory.OAuth2API) {
+	c := ory.NewOAuth2Client()
+    c.SetClientId(clientConfig.Id)
+	c.SetClientName(clientConfig.Name)
+	c.SetRedirectUris(clientConfig.RedirectUris)
+	c.SetSkipConsent(true)
+	c.SetGrantTypes([]string{"authorization_code", "refresh_token"})
+	c.SetScope("openid offline")
+	c.SetResponseTypes([]string{"code"})
+	c.SetTokenEndpointAuthMethod("none")
+
+    client, _ := Must2(oauth2.CreateOAuth2Client(context.Background()).OAuth2Client(*c).Execute())
+    Log.Debugw("Created OAuth2 client", "Id", *client.ClientId, "Name", *client.ClientName)
 }

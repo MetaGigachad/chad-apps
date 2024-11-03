@@ -11,7 +11,6 @@ import (
 	"log/slog"
 
 	"github.com/MetaGigachad/chad-apps/onboarding_service/internals/config"
-	"github.com/MetaGigachad/chad-apps/onboarding_service/internals/utils"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	"github.com/jmoiron/sqlx"
@@ -33,7 +32,7 @@ func MakeBot(config *config.Config, db *sqlx.DB) *Bot {
 
 	opts := []bot.Option{
 		bot.WithDefaultHandler(func(ctx context.Context, b *bot.Bot, update *models.Update) {
-			defaultHandler(ctx, b, update, config, db)
+			defaultHandler(ctx, b, update, db)
 		}),
 	}
 
@@ -63,16 +62,16 @@ func (b *Bot) Serve(stopChan <-chan struct{}, wg *sync.WaitGroup) {
 	(*b.Cancel)()
 }
 
-func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update, config *config.Config, db *sqlx.DB) {
+func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update, db *sqlx.DB) {
 	if update.Message != nil {
-		messageHandler(ctx, b, update.Message, config, db)
+		messageHandler(ctx, b, update.Message, db)
 	}
 	if update.CallbackQuery != nil {
-		callbackQueryHandler(ctx, b, update.CallbackQuery, config, db)
+		callbackQueryHandler(ctx, b, update.CallbackQuery, db)
 	}
 }
 
-func callbackQueryHandler(ctx context.Context, b *bot.Bot, query *models.CallbackQuery, config *config.Config, db *sqlx.DB) {
+func callbackQueryHandler(ctx context.Context, b *bot.Bot, query *models.CallbackQuery, db *sqlx.DB) {
 	if query.Data == "complete_task" {
 		getLen := func(str string) int { return len(utf16.Encode([]rune(str))) }
 		msg := query.Message.Message
@@ -105,28 +104,23 @@ func callbackQueryHandler(ctx context.Context, b *bot.Bot, query *models.Callbac
 	}
 }
 
-func messageHandler(ctx context.Context, b *bot.Bot, msg *models.Message, config *config.Config, db *sqlx.DB) {
+func messageHandler(ctx context.Context, b *bot.Bot, msg *models.Message, db *sqlx.DB) {
 	slog.Debug(fmt.Sprintf(`Handling Message update from @%s with text "%s"`, msg.From.Username, msg.Text))
 	switch msg.Chat.Type {
 	case "private":
-		routeMessage(ctx, b, msg, config, db)
+		routeMessage(ctx, b, msg, db)
 	default:
 		panic(fmt.Sprintf("Unexprected chat type: %s", msg.Chat.Type))
 	}
 }
 
-func routeMessage(ctx context.Context, b *bot.Bot, msg *models.Message, config *config.Config, db *sqlx.DB) {
+func routeMessage(ctx context.Context, b *bot.Bot, msg *models.Message, db *sqlx.DB) {
 	slog.Debug(fmt.Sprintf("Routing message from user id %d ...", msg.From.ID))
 
 	if msg.Text == "/help" {
 		slog.Debug("Routing to Help")
 		cacheChadId(msg, db)
 		help(ctx, b, msg)
-	}
-
-	isAdmin := utils.Contains(config.Bot.AdminIds, msg.From.ID)
-	if !isAdmin {
-		return
 	}
 }
 
@@ -143,8 +137,5 @@ func help(ctx context.Context, b *bot.Bot, msg *models.Message) {
 }
 
 func cacheChadId(msg *models.Message, db *sqlx.DB) {
-	_, err := db.Exec("INSERT OR REPLACE INTO TelegramUsers (Username, ChatId) VALUES (?, ?)", msg.From.Username, msg.Chat.ID)
-	if err != nil {
-		panic(err)
-	}
+	db.MustExec("INSERT OR REPLACE INTO TelegramUsers (Username, ChatId) VALUES (?, ?)", msg.From.Username, msg.Chat.ID)
 }

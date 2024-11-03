@@ -1,2 +1,5 @@
 .env
 .*/ssl
+**/dist
+**/build
+**/node_modules

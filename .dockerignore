@@ -1,2 +1,2 @@
-/auth_app/node_modules
-/onboarding_app/node_modules
+**/node_modules
+**/dist

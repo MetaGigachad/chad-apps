@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-postgres
+spec:
+  selector:
+    app: auth-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+      protocol: TCP
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-postgres
+spec:
+  selector:
+    matchLabels:
+      app: auth-postgres
+  template:
+    metadata:
+      labels:
+        app: auth-postgres
+    spec:
+      containers:
+      - name: auth-postgres
+        image: postgres:latest
+        ports:
+        - containerPort: 5432
+        env:
+          - name: POSTGRES_USER
+            value: admin
+          - name: POSTGRES_PASSWORD
+            value: {{ $.Values.auth.postgres.passwords.admin }}
+          - name: POSTGRES_DB
+            value: admin
+        volumeMounts:
+          - mountPath: /var/lib/postgresql/data
+            name: auth-postgres-data
+          - mountPath: /docker-entrypoint-initdb.d
+            name: init
+      volumes:
+      - name: auth-postgres-data
+        persistentVolumeClaim:
+          claimName: auth-postgres-pvc
+      - name: init
+        configMap:
+          name: auth-postgres-init
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-postgres-init
+data:
+  init.sh: |
+    #!/bin/bash
+    set -e
+
+    sql() {
+        psql -U admin -d "$1"
+    }
+
+    export PGPASSWORD='{{ $.Values.auth.postgres.passwords.admin }}'
+
+    sql admin <<EOF
+        CREATE DATABASE service;
+        CREATE USER service 
+          WITH ENCRYPTED PASSWORD '{{ $.Values.auth.postgres.passwords.service }}';
+        GRANT ALL PRIVILEGES ON DATABASE service TO service;
+
+        CREATE DATABASE hydra;
+        CREATE USER hydra 
+          WITH ENCRYPTED PASSWORD '{{ $.Values.auth.postgres.passwords.hydra }}';
+        GRANT ALL PRIVILEGES ON DATABASE hydra TO hydra;
+    EOF
+
+    sql service <<EOF
+        GRANT USAGE, CREATE ON SCHEMA public TO service;
+        GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO service;
+        ALTER DEFAULT PRIVILEGES IN SCHEMA public 
+          GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO service;
+    EOF
+
+    sql hydra <<EOF
+        GRANT USAGE, CREATE ON SCHEMA public TO hydra;
+        GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO hydra;
+        ALTER DEFAULT PRIVILEGES IN SCHEMA public 
+          GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO hydra;
+    EOF
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: auth-postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

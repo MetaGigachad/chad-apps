@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: onboarding-service
+spec:
+  selector:
+    app: onboarding-service
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: onboarding-service
+spec:
+  selector:
+    matchLabels:
+      app: onboarding-service
+  template:
+    metadata:
+      labels:
+        app: onboarding-service
+    spec:
+      containers:
+      - name: onboarding-service
+        image: {{ $.Values.onboarding.service.image }}
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config/app.yml
+          subPath: app.yml
+        - name: data-volume
+          mountPath: /app/data
+      volumes:
+      - name: config-volume
+        secret:
+          secretName: onboarding-service-config
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: onboarding-service-data
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: onboarding-service-config
+type: Opaque
+stringData:
+  app.yml: |
+    bot:
+      token: {{ $.Values.onboarding.service.botToken }}
+    database:
+      path: data/main.db
+    http_api:
+      host: 0.0.0.0
+      port: 80
+      path_prefix: /api
+    ory:
+      url: http://hydra-admin
+    frontend_config:
+      oauth2:
+        auth_url: https://auth.metachad.duckdns.org/oauth2/auth
+        token_url: https://auth.metachad.duckdns.org/oauth2/token
+        client_id: {{ $.Values.onboarding.oauth2Client.id }}
+        redirect_uri: {{ index $.Values.onboarding.oauth2Client.redirectUris 0 }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: onboarding-service-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

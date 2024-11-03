@@ -25,21 +25,27 @@ import (
 func ListenAndServe(config *config.Config, db *sqlx.DB, stopChan <-chan struct{}, wg *sync.WaitGroup) {
     defer wg.Done()
 
+    pattern := func(method string, path string) string {
+        return fmt.Sprintf("%s %s%s", method, config.HttpAPI.PathPrefix, path)
+    }
+
 	serveMux := http.NewServeMux()
-	serveMux.Handle("GET /username", authMiddleware(http.HandlerFunc(getUsernameHandler)))
-	serveMux.Handle("GET /plans", authMiddleware(http.HandlerFunc(getPlansHandler)))
-	serveMux.Handle("POST /plans", authMiddleware(http.HandlerFunc(newPlanHandler)))
-	serveMux.Handle("GET /plans/{id}", authMiddleware(http.HandlerFunc(getPlanHandler)))
-	serveMux.Handle("POST /plans/{id}", authMiddleware(http.HandlerFunc(migratePlanHandler)))
-	serveMux.Handle("DELETE /plans/{id}", authMiddleware(http.HandlerFunc(deletePlanHandler)))
-	serveMux.Handle("GET /deployments", authMiddleware(http.HandlerFunc(getDeploymentsHandler)))
-	serveMux.Handle("POST /deployments", authMiddleware(http.HandlerFunc(newDeploymentHandler)))
+	serveMux.Handle(pattern("GET", "/config"), http.HandlerFunc(getConfigHandler))
+	serveMux.Handle(pattern("GET", "/username"), authMiddleware(http.HandlerFunc(getUsernameHandler)))
+	serveMux.Handle(pattern("GET", "/plans"), authMiddleware(http.HandlerFunc(getPlansHandler)))
+	serveMux.Handle(pattern("POST", "/plans"), authMiddleware(http.HandlerFunc(newPlanHandler)))
+	serveMux.Handle(pattern("GET", "/plans/{id}"), authMiddleware(http.HandlerFunc(getPlanHandler)))
+	serveMux.Handle(pattern("POST", "/plans/{id}"), authMiddleware(http.HandlerFunc(migratePlanHandler)))
+	serveMux.Handle(pattern("DELETE", "/plans/{id}"), authMiddleware(http.HandlerFunc(deletePlanHandler)))
+	serveMux.Handle(pattern("GET", "/deployments"), authMiddleware(http.HandlerFunc(getDeploymentsHandler)))
+	serveMux.Handle(pattern("POST", "/deployments"), authMiddleware(http.HandlerFunc(newDeploymentHandler)))
 	handler := loggingMiddleware(serveMux)
 
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "oauth2", MakeOauth2Client(config))
 	ctx = context.WithValue(ctx, "db", db)
 	ctx = context.WithValue(ctx, "json", msg.MakeJsonAPI())
+	ctx = context.WithValue(ctx, "config", config)
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf("%s:%s", config.HttpAPI.Host, config.HttpAPI.Port),
@@ -78,12 +84,19 @@ func MakeOauth2Client(config *config.Config) ory.OAuth2API {
 
 func loggingMiddleware(next http.Handler) http.Handler {
 	requestId := int64(0)
+    makeFullUrl := func(r *http.Request) string {
+        scheme := "http"
+        if r.TLS != nil {
+            scheme = "https"
+        }
+        return fmt.Sprintf("%s://%s%s", scheme, r.Host, r.RequestURI)
+    }
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		atomic.AddInt64(&requestId, 1)
 		logger := slog.Default().With("requestId", requestId)
 		r = r.WithContext(context.WithValue(r.Context(), "logger", logger))
 
-		description := fmt.Sprintf("HTTP %s %s from ", r.Method, r.URL.Opaque, getClientIP(r))
+		description := fmt.Sprintf("HTTP %s %s from %s", r.Method, makeFullUrl(r), getClientIP(r))
 		logger.Debug(description, "headers", r.Header)
 
 		next.ServeHTTP(w, r)
@@ -112,6 +125,7 @@ func authMiddleware(next http.Handler) http.Handler {
 			slog.Debug("Error of Inrospecting", "httpResponse", httpResp)
 			panic(err)
 		}
+        logger.Debug("oauth2Response info", "res", oauth2Response)
 		if !oauth2Response.HasSub() {
 			code := http.StatusUnauthorized
 			w.WriteHeader(http.StatusUnauthorized)
@@ -150,6 +164,27 @@ func getClientIP(r *http.Request) string {
 	}
 
 	return ip
+}
+
+func getConfigHandler(w http.ResponseWriter, r *http.Request) {
+    config := r.Context().Value("config").(*config.Config)
+	json := r.Context().Value("json").(jsoniter.API)
+    
+    frontendConfig := msg.FrontendConfig{
+        OAuth2: msg.FrontendConfigOAuth2 {
+            AuthUrl: config.FrontendConfig.OAuth2.AuthUrl,
+            TokenUrl: config.FrontendConfig.OAuth2.TokenUrl,
+            ClientId: config.FrontendConfig.OAuth2.ClientId,
+            RedirectUri: config.FrontendConfig.OAuth2.RedirectUri,
+        },
+    }
+
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+    err := json.NewEncoder(w).Encode(frontendConfig)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func getPlansHandler(w http.ResponseWriter, r *http.Request) {

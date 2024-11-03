@@ -1,0 +1,22 @@
+auth:
+  frontend:
+    image: metagigachad/private:chad_apps-auth_frontend
+  service:
+    image: metagigachad/private:chad_apps-auth_service
+  postgres:
+    passwords:
+      admin: change-this-1
+      service: change-this-2
+      hydra: change-this-3
+
+onboarding:
+  frontend:
+    image: metagigachad/private:chad_apps-onboarding_frontend
+  service:
+    image: metagigachad/private:chad_apps-onboarding_service
+    botToken: change-this-4
+  oauth2Client:
+    id: onboarding
+    name: Chad's Onboarding App Client
+    redirectUris:
+      - https://onboarding.metachad.duckdns.org/plans

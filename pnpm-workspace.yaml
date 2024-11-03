@@ -1,0 +1,3 @@
+packages:
+  - './libraries/frontend_common'
+  - './onboarding_frontend'

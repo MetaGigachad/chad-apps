@@ -1,0 +1,22 @@
+{{- range $item := list
+  (dict "subdomain" "grafana" "namespace" "prometheus")
+  (dict "subdomain" "oauth2" "namespace" "hydra")
+  (dict "subdomain" "auth" "namespace" "default")
+  (dict "subdomain" "onboarding" "namespace" "default")
+}}
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/cert-manager.io/certificate_v1.json
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ $item.subdomain }}-cert
+  namespace: {{ $item.namespace }}
+spec:
+  commonName: {{ $item.subdomain }}.metachad.duckdns.org
+  dnsNames:
+    - {{ $item.subdomain }}.metachad.duckdns.org
+  secretName: {{ $item.subdomain }}-cert
+  issuerRef:
+    name: custom-root-ca-issuer
+    kind: ClusterIssuer
+{{- end }}

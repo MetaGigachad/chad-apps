@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/trust.cert-manager.io/bundle_v1alpha1.json
+apiVersion: trust.cert-manager.io/v1alpha1
+kind: Bundle
+metadata:
+  name: public-bundle
+spec:
+  sources:
+    - useDefaultCAs: true
+    - secret:
+        key: "ca.crt"
+        name: custom-root-ca-cert
+  target:
+    configMap:
+      key: "ca-certificates.crt"
+    namespaceSelector: {}
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/mutations.gatekeeper.sh/assign_v1.json
+apiVersion: mutations.gatekeeper.sh/v1
+kind: Assign
+metadata:
+  name: demo-trust-ca-volume
+spec:
+  applyTo:
+  - groups: [""]
+    kinds: ["Pod"]
+    versions: ["v1"]
+  match:
+    scope: Namespaced
+    kinds:
+    - apiGroups: ["*"]
+      kinds: ["Pod"]
+    namespaces: ["prometheus", "default"]
+  location: "spec.volumes[name:ca-certificates]"
+  parameters:
+    assign:
+      value:
+        name: ca-certificates
+        configMap:
+          name: public-bundle
+          defaultMode: 0644
+          optional: false
+          items:
+          - key: ca-certificates.crt
+            path: ca-certificates.crt
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/mutations.gatekeeper.sh/assign_v1.json
+apiVersion: mutations.gatekeeper.sh/v1
+kind: Assign
+metadata:
+  name: demo-trust-ca-volumemount
+spec:
+  applyTo:
+  - groups: [""]
+    kinds: ["Pod"]
+    versions: ["v1"]
+  match:
+    scope: Namespaced
+    kinds:
+    - apiGroups: ["*"]
+      kinds: ["Pod"]
+    namespaces: ["prometheus", "default"]
+  location: "spec.containers[name:*].volumeMounts[name:ca-certificates]"
+  parameters:
+    assign:
+      value:
+        mountPath: /etc/ssl/certs/
+        name: ca-certificates
+        readOnly: true

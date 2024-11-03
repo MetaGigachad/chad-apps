@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+spec:
+  selector:
+    app: auth-service
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+      - name: auth-service
+        image: {{ $.Values.auth.service.image }}
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config/app.yaml
+          subPath: app.yaml
+      volumes:
+      - name: config-volume
+        secret:
+          secretName: auth-service-config
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: auth-service-config
+type: Opaque
+stringData:
+  app.yaml: |
+    postgres:
+      configStr: "postgresql://service:{{ $.Values.auth.postgres.passwords.service }}@auth-postgres:5432/service"
+    ory:
+      adminUrl: http://hydra-admin
+      clients:
+{{ list $.Values.onboarding.oauth2Client | toYaml | indent 8 }}
+    httpServer:
+      host: 0.0.0.0
+      port: 80
+      pathPrefix: /api
+      debugMode: false
+    featureFlags:
+      oryProxyHeaders: true
+    log:
+      level: debug
+

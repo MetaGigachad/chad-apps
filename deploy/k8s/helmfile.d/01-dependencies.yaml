@@ -1,0 +1,40 @@
+repositories:
+  - name: jetstack 
+    url: https://charts.jetstack.io
+  - name: ory
+    url: https://k8s.ory.sh/helm/charts
+  - name: gatekeeper
+    url: https://open-policy-agent.github.io/gatekeeper/charts
+  - name: prometheus-community
+    url: https://prometheus-community.github.io/helm-charts
+
+releases:
+  - name: gatekeeper
+    chart: gatekeeper/gatekeeper
+    version: 3.17.1
+    namespace: gatekeeper-system
+    createNamespace: true
+    values:
+      - ../values/gatekeeper.yaml
+  - name: cert-manager
+    chart: jetstack/cert-manager
+    version: 1.16.1
+    namespace: cert-manager
+    createNamespace: true
+    values:
+      - ../values/cert-manager.yaml
+  - name: hydra
+    chart: ory/hydra
+    version: 0.49.2
+    namespace: hydra
+    createNamespace: true
+    values:
+      - ../values/hydra.yaml
+  - name: prometheus
+    chart: prometheus-community/kube-prometheus-stack
+    version: 65.5.0
+    namespace: prometheus
+    createNamespace: true
+    disableValidation: true
+    values:
+      - ../values/prometheus.yaml

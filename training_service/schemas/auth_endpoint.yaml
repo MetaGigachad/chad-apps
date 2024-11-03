@@ -1,0 +1,12 @@
+components:
+  schemas:
+    IntrospectResponseBody:
+      type: object
+      additionalProperties: true
+      properties:
+        active:
+          type: boolean
+        sub:
+          type: string
+      required:
+        - active

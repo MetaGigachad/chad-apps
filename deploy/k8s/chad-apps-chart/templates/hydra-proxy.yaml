@@ -1,0 +1,106 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hydra-public
+spec:
+  type: ExternalName
+  externalName: hydra-public.hydra.svc.cluster.local
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 4444
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hydra-admin
+  labels:
+    app: hydra-admin
+spec:
+  selector:
+    app: hydra-proxy
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hydra-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hydra-proxy
+  template:
+    metadata:
+      labels:
+        app: hydra-proxy
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: hydra-proxy-config
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hydra-proxy-config
+data:
+  nginx.conf: |
+    events {}
+
+    http {
+        log_format full_request '$remote_addr - $remote_user OMEGABOOOB [$time_local] "$request" '
+                        '$status $body_bytes_sent "$http_referer" '
+                        '"$http_user_agent" "$server_name"';
+        access_log /var/log/nginx/access.log full_request;
+        error_log /var/log/nginx/error.log debug;
+
+        server {
+            listen 80;
+            server_name hydra-admin hydra-admin.default;
+
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto https;
+
+            location / {
+                proxy_pass http://hydra-admin.hydra:4445;
+            }
+        }
+    }
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/monitoring.coreos.com/servicemonitor_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: hydra-admin
+  labels:
+    app: hydra-admin
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: hydra-admin
+  endpoints:
+    - targetPort: 80
+      interval: 15s
+      scheme: http
+      path: /admin/metrics/prometheus
+#      honorLabels: true
+#      relabelings:
+#        - targetLabel: __address__
+#          replacement: "hydra-admin.default:80"

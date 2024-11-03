@@ -1,0 +1,15 @@
+hydra:
+  automigration:
+    enabled: true
+  config: 
+    urls:
+      self:
+        issuer: https://auth.metachad.duckdns.org
+      login: https://auth.metachad.duckdns.org/login
+      consent: https://auth.metachad.duckdns.org/consent
+maester:
+  enabled: false
+deployment:
+  extraEnv:
+    - name: DSN
+      value: postgres://hydra:change-this-3@auth-postgres.default:5432/hydra

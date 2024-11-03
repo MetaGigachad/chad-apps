@@ -1,3 +1,0 @@
-[submodule "gateway/contrib/userver"]
-    path = gateway/contrib/userver
-    url = https://github.com/userver-framework/userver.git
