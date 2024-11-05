@@ -161,7 +161,7 @@ const exerciseDescriptors = exercises.map((x) => ({
 }));
 
 export const handlers = [
-  http.get("/api/workout", () => {
+  http.get("/api/workouts", () => {
     return HttpResponse.json(workoutDescriptors);
   }),
 
@@ -169,7 +169,7 @@ export const handlers = [
     return HttpResponse.json(workouts[params.id as string]);
   }),
 
-  http.get("/api/exercise", () => {
+  http.get("/api/exercises", () => {
     return HttpResponse.json(exerciseDescriptors);
   }),
 ];

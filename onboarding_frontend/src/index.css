@@ -68,22 +68,22 @@ input[type=number] {
 
   /* width */
 ::-webkit-scrollbar {
-  @apply dark:bg-gray-600 rounded-lg w-3;
+  @apply dark:bg-zinc-600 rounded-lg w-3;
 }
 
 /* Track */
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
-  @apply dark:bg-gray-600 rounded-lg;
+  @apply dark:bg-zinc-600 rounded-lg;
 }
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
   border-radius: 5px;
-  @apply dark:bg-gray-400 rounded-lg;
+  @apply dark:bg-zinc-400 rounded-lg;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  @apply dark:bg-gray-300 rounded-lg;
+  @apply dark:bg-zinc-300 rounded-lg;
 }

@@ -1,7 +1,9 @@
+import { useLoggedInUser, apiFetch } from "@metachad/frontend-common";
 import { parseDates } from "./utils";
 
 export async function fetchWorkouts(): Promise<WorkoutDescriptor[]> {
-  const res = await fetch("/api/workout").then((r) => r.json());
+  const [user] = useLoggedInUser();
+  const res = await apiFetch(user, "/workouts").then((r) => r.json());
   return parseDates(res);
 }
 
@@ -15,7 +17,7 @@ export function createFetchWorkout(id: string) {
 }
 
 export async function fetchExercise(): Promise<ExerciseDescriptor[]> {
-  const res = await fetch("/api/exercise").then((r) => r.json());
+  const res = await fetch("/api/exercises").then((r) => r.json());
   return res;
 }
 

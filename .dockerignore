@@ -1,2 +1,9 @@
 **/node_modules
 **/dist
+**/.pgdata
+**/.cache
+**/.ccache
+**/.cores
+**/compile_commands.json
+**/build_debug
+**/build_release

@@ -12,9 +12,9 @@ export const PrimaryButton: Component<PrimaryButtonProps> = (props) => (
     type={props.type}
     class="w-32 self-center rounded-md px-4 py-2 transition-all "
     classList={{
-      "bg-gray-600 text-gray-200 hover:bg-gray-800 dark:bg-gray-200 dark:text-gray-600 dark:hover:bg-gray-400":
+      "bg-zinc-600 text-zinc-200 hover:bg-zinc-800 dark:bg-zinc-200 dark:text-zinc-600 dark:hover:bg-zinc-400":
         !props.disabled,
-      "text-gray-500 border border-gray-500 dark:border-gray-300 dark:text-gray-300":
+      "text-zinc-500 border border-zinc-500 dark:border-zinc-300 dark:text-zinc-300":
         props.disabled,
     }}
     onClick={props.onClick}

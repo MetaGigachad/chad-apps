@@ -7,7 +7,7 @@ export function LoggedInPage() {
   const [_, methods] = useLoggedInUser();
   return (
     <div class="flex justify-center items-center min-h-screen">
-      <div class="flex flex-col items-center rounded-xl dark:bg-gray-800 dark:text-gray-300 p-4">
+      <div class="flex flex-col items-center rounded-xl dark:bg-zinc-800 dark:text-zinc-300 p-4">
         <h2 class="text-2xl font-bold">Onboarding control plane</h2>
         <div class="flex flex-col items-start gap-2 mt-5">
           <For
@@ -28,7 +28,7 @@ export function LoggedInPage() {
           </For>
         </div>
         <button
-          class="rounded-md dark:bg-gray-300 dark:text-gray-800 hover:dark:bg-gray-200 mt-5 p-1 font-bold"
+          class="rounded-md dark:bg-zinc-300 dark:text-zinc-800 hover:dark:bg-zinc-200 mt-5 p-1 font-bold"
           onClick={methods().logout}
         >
           Log Out

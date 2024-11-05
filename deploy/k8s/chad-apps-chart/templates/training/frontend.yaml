@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: training-frontend
+spec:
+  selector:
+    app: training-frontend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: training-frontend
+spec:
+  selector:
+    matchLabels:
+      app: training-frontend
+  template:
+    metadata:
+      labels:
+        app: training-frontend
+    spec:
+      containers:
+      - name: training-frontend
+        image: {{ $.Values.training.frontend.image }}
+        ports:
+        - containerPort: 80

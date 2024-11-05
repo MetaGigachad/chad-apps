@@ -20,3 +20,18 @@ onboarding:
     name: Chad's Onboarding App Client
     redirectUris:
       - https://onboarding.metachad.duckdns.org/plans
+
+training:
+  frontend:
+    image: metagigachad/private:chad_apps-training_frontend
+  service:
+    image: metagigachad/private:chad_apps-training_service
+  postgres:
+    passwords:
+      admin: change-this-5
+      service: change-this-6
+  oauth2Client:
+    id: training
+    name: Chad's Training App Client
+    redirectUris:
+      - https://training.metachad.duckdns.org/workouts

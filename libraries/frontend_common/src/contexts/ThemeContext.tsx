@@ -1,12 +1,12 @@
 import { makePersisted } from "@solid-primitives/storage";
-import { ParentProps, createContext, createSignal } from "solid-js";
+import { Accessor, ParentProps, createContext, createSignal } from "solid-js";
 
 type Theme = "light" | "dark";
 export interface ThemeContextType {
   value: Theme;
   toggle: () => void;
 }
-export const ThemeContext = createContext<ThemeContextType>();
+export const ThemeContext = createContext<[Accessor<Theme>, () => void]>();
 
 export function ThemeProvider(props: ParentProps) {
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -26,14 +26,8 @@ export function ThemeProvider(props: ParentProps) {
     }
   };
 
-  const context = () =>
-    ({
-      value: theme(),
-      toggle,
-    }) as ThemeContextType;
-
   return (
-    <ThemeContext.Provider value={context()}>
+    <ThemeContext.Provider value={[theme, toggle]}>
       {props.children}
     </ThemeContext.Provider>
   );

@@ -13,6 +13,7 @@ import {
 } from "solid-js";
 import { createContext } from "solid-js";
 import { reconcile, createStore, unwrap } from "solid-js/store";
+import { clearSearchParams } from "../utils/etc";
 
 export const UserContext = createContext<[UserContextDataType, Accessor<UserContextMethodsType>]>();
 
@@ -77,6 +78,7 @@ export function UserProvider(rawProps: UserProviderProps) {
       state: data.state,
     });
 
+    console.log("redirecting to ", `${props.oauth2Config.authUrl}?${params.toString()}`);
     window.location.assign(
       `${props.oauth2Config.authUrl}?${params.toString()}`,
     );
@@ -91,9 +93,20 @@ export function UserProvider(rawProps: UserProviderProps) {
       return;
     }
 
-    const code = new URLSearchParams(window.location.search).get("code");
+    const urlParams = new URLSearchParams(window.location.search);
+    clearSearchParams();
+
+    const error = urlParams.get("error");
+    if (error === "access_denied") {
+      setContext(reconcile({state: "loggedOut"}));
+      return;
+    }
+
+    const code = urlParams.get("code");
     if (code == null) {
-      throw `Authorization code wasn't provided by OAuth2 endpoint`;
+      console.log(`Authorization code wasn't provided by OAuth2 endpoint`);
+      setContext(reconcile({state: "loggedOut"}));
+      return;
     }
 
     const headers = {
@@ -106,16 +119,17 @@ export function UserProvider(rawProps: UserProviderProps) {
       code_verifier: context.data.codeVerifier,
       code,
     }).toString();
-    const oauth2Data: OAuth2Data = await fetch(props.oauth2Config.tokenUrl, {
+    const res: Response = await fetch(props.oauth2Config.tokenUrl, {
       method: "POST",
       headers,
       body,
-    }).then((res) => {
-      if (!res.ok) {
-        throw `Code for tokens exchange failed: ${res.status}`;
-      }
-      return res.json();
     });
+    if (!res.ok) {
+      console.log(`Code for tokens exchange failed: ${res.status}`);
+      setContext(reconcile({state: "loggedOut"}));
+      return;
+    }
+    const oauth2Data: OAuth2Data = await res.json();
 
     const newContext: UserContextDataType = {
       state: "loggedIn",

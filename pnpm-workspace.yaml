@@ -1,3 +1,4 @@
 packages:
   - './libraries/frontend_common'
   - './onboarding_frontend'
+  - './training_frontend'

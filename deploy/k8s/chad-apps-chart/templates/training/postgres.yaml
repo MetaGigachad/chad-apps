@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: training-postgres
+spec:
+  selector:
+    app: training-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+      protocol: TCP
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: training-postgres
+spec:
+  selector:
+    matchLabels:
+      app: training-postgres
+  template:
+    metadata:
+      labels:
+        app: training-postgres
+    spec:
+      containers:
+      - name: training-postgres
+        image: postgres:latest
+        ports:
+        - containerPort: 5432
+        env:
+          - name: POSTGRES_USER
+            value: admin
+          - name: POSTGRES_PASSWORD
+            value: {{ $.Values.training.postgres.passwords.admin }}
+          - name: POSTGRES_DB
+            value: admin
+        volumeMounts:
+          - mountPath: /var/lib/postgresql/data
+            name: training-postgres-data
+          - mountPath: /docker-entrypoint-initdb.d
+            name: init
+      volumes:
+      - name: training-postgres-data
+        persistentVolumeClaim:
+          claimName: training-postgres-pvc
+      - name: init
+        configMap:
+          name: training-postgres-init
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: training-postgres-init
+data:
+  init.sh: |
+    #!/bin/bash
+    set -e
+
+    sql() {
+        psql -U admin -d "$1"
+    }
+
+    export PGPASSWORD='{{ $.Values.training.postgres.passwords.admin }}'
+
+    sql admin <<EOF
+        CREATE DATABASE service;
+        CREATE USER service 
+          WITH ENCRYPTED PASSWORD '{{ $.Values.training.postgres.passwords.service }}';
+        GRANT ALL PRIVILEGES ON DATABASE service TO service;
+    EOF
+
+    sql service <<EOF
+        GRANT USAGE, CREATE ON SCHEMA public TO service;
+        GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO service;
+        ALTER DEFAULT PRIVILEGES IN SCHEMA public 
+          GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO service;
+    EOF
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: training-postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+

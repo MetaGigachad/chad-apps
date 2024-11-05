@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
 // import devtools from 'solid-devtools/vite';
+import checker from 'vite-plugin-checker';
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig({
@@ -12,6 +13,7 @@ export default defineConfig({
     // devtools(),
     solidPlugin(),
     nodePolyfills({protocolImports: true}),
+    checker({ typescript: true }),
   ],
   server: {
     port: 3000,

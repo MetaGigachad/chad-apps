@@ -36,3 +36,9 @@ export async function waitForValue<T>(signal: Accessor<T>, value: T) {
     );
   });
 }
+
+export function clearSearchParams() {
+    const url = new URL(window.location.toString());
+    url.search = '';
+    window.history.replaceState({}, document.title, url);
+}

@@ -38,10 +38,3 @@ Makefile contains typicaly useful targets for development:
 * `make docker-clean-data` - stop docker containers and clean database data
 
 Edit `Makefile.local` to change the default configuration and build options.
-
-
-## License
-
-The original template is distributed under the [Apache-2.0 License](https://github.com/userver-framework/userver/blob/develop/LICENSE)
-and [CLA](https://github.com/userver-framework/userver/blob/develop/CONTRIBUTING.md). Services based on the template may change
-the license and CLA.

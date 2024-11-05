@@ -97,7 +97,7 @@ export const Plan: Component = () => {
           when={blocks().length > 0}
           fallback={
             <button
-              class="p-2 font-bold text-md flex items-center rounded-xl border dark:border-gray-700 dark:text-gray-700 hover:dark:text-gray-400"
+              class="p-2 font-bold text-md flex items-center rounded-xl border dark:border-zinc-700 dark:text-zinc-700 hover:dark:text-zinc-400"
               onClick={() =>
                 setBlocks([
                   createStore<BlockData>({
@@ -136,7 +136,7 @@ export function MigrateButton(props: { onClick: () => Promise<void> }) {
     <Switch>
       <Match when={state() === "button"}>
         <button
-          class="p-2 font-bold text-md rounded-xl dark:bg-gray-300 dark:text-gray-700 hover:dark:bg-gray-200"
+          class="p-2 font-bold text-md rounded-xl dark:bg-zinc-300 dark:text-zinc-700 hover:dark:bg-zinc-200"
           onClick={async () => {
             await Promise.all([props.onClick(), sleep(200).then(() => setState("loader"))])
             setState("msg");
@@ -148,10 +148,10 @@ export function MigrateButton(props: { onClick: () => Promise<void> }) {
         </button>
       </Match>
       <Match when={state() === "loader"}>
-        <div class="p-2 font-bold text-md rounded-xl dark:text-gray-400 ring dark:ring-gray-400">Loading</div>
+        <div class="p-2 font-bold text-md rounded-xl dark:text-zinc-400 ring dark:ring-zinc-400">Loading</div>
       </Match>
       <Match when={state() === "msg"}>
-        <div class="p-2 font-bold text-md rounded-xl dark:bg-green-300 dark:text-gray-700">Success</div>
+        <div class="p-2 font-bold text-md rounded-xl dark:bg-green-300 dark:text-zinc-700">Success</div>
       </Match>
     </Switch>
   );
@@ -226,15 +226,15 @@ export const BlockWithControls: Component<{
         style={{ visibility: show() ? "visible" : "hidden" }}
         class="flex items-center gap-2 text-xs"
       >
-        <span class="material-symbols-outlined dark:text-gray-700">
+        <span class="material-symbols-outlined dark:text-zinc-700">
           subdirectory_arrow_right
         </span>
-        <div class="flex items-stretch rounded-xl text-xs border overflow-hidden dark:border-gray-700 dark:text-gray-700">
-          <div class="px-2 py-1 dark:bg-gray-700 dark:text-gray-800">
+        <div class="flex items-stretch rounded-xl text-xs border overflow-hidden dark:border-zinc-700 dark:text-zinc-700">
+          <div class="px-2 py-1 dark:bg-zinc-700 dark:text-zinc-800">
             <span class="material-symbols-outlined">add</span>
           </div>
           <button
-            class="px-2 hover:dark:text-gray-400"
+            class="px-2 hover:dark:text-zinc-400"
             onClick={(_) => {
               props.setBlocks((x) => {
                 x.splice(
@@ -253,7 +253,7 @@ export const BlockWithControls: Component<{
             <span class="material-symbols-outlined">arrow_upward</span>
           </button>
           <button
-            class="px-2 hover:dark:text-gray-400"
+            class="px-2 hover:dark:text-zinc-400"
             onClick={(_) => {
               props.setBlocks((x) => {
                 x.splice(
@@ -273,9 +273,9 @@ export const BlockWithControls: Component<{
           </button>
         </div>
         <Show when={props.showDelete}>
-          <div class="flex items-center rounded-xl text-xs border dark:border-gray-700 dark:text-gray-700">
+          <div class="flex items-center rounded-xl text-xs border dark:border-zinc-700 dark:text-zinc-700">
             <button
-              class="px-2 py-1 hover:dark:text-gray-400"
+              class="px-2 py-1 hover:dark:text-zinc-400"
               onClick={(_) => {
                 props.setBlocks((x) => {
                   x.splice(props.index, 1);
@@ -431,8 +431,8 @@ export const BaseBlock: ParentComponent<{ header: JSX.Element }> = (props) => {
       ref={ref!}
       class="flex flex-col place-self-stretch gap-1 rounded-xl p-2 transition-colors duration-1000"
       classList={{
-        "dark:bg-gray-700": !highlight(),
-        "dark:bg-gray-600": highlight(),
+        "dark:bg-zinc-700": !highlight(),
+        "dark:bg-zinc-600": highlight(),
       }}
     >
       <div>{props.header}</div>
@@ -511,7 +511,7 @@ export const TitleEditor: Component<{
   return (
     <input
       placeholder={props.placeholder}
-      class="resize-y rounded-lg border border-gray-400 bg-gray-700 px-2 py-1 text-lg text-gray-200 focus:border-gray-200 focus:outline-none"
+      class="resize-y rounded-lg border border-zinc-400 bg-zinc-700 px-2 py-1 text-lg text-zinc-200 focus:border-zinc-200 focus:outline-none"
       type="text"
       autocomplete="off"
       onChange={(e) => props.onChange(e.target.value)}
@@ -528,7 +528,7 @@ export const TextEditor: Component<{
   return (
     <textarea
       placeholder={props.placeholder}
-      class="resize-y rounded-lg border border-gray-400 bg-gray-700 px-2 py-1 text-sm text-gray-200 focus:border-gray-200 focus:outline-none"
+      class="resize-y rounded-lg border border-zinc-400 bg-zinc-700 px-2 py-1 text-sm text-zinc-200 focus:border-zinc-200 focus:outline-none"
       rows="6"
       cols="26"
       onChange={(e) => props.onChange(e.target.value)}

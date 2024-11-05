@@ -18,12 +18,12 @@ export const PageBase: Component<PageBaseProps> = (props) => {
   }
 
   return (
-    <div class="w-96 rounded-lg bg-gray-100 bg-opacity-80 p-8 text-gray-600 decoration-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:decoration-gray-200">
+    <div class="w-96 rounded-lg bg-zinc-100 bg-opacity-80 p-8 text-zinc-600 decoration-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:decoration-zinc-200">
       <div class="mb-6">
         <div class="flex items-center justify-center">
           <h2 class="text-center text-2xl font-semibold">{props.title}</h2>
           <button
-            class="material-symbols-outlined ml-auto rounded-full px-2 py-2 transition-all hover:text-gray-800 dark:hover:text-gray-400"
+            class="material-symbols-outlined ml-auto rounded-full px-2 py-2 transition-all hover:text-zinc-800 dark:hover:text-zinc-400"
             onClick={() => setDarkMode(!DarkMode())}
           >
             {DarkMode() ? "dark_mode" : "light_mode"}

@@ -1,0 +1,25 @@
+components:
+  schemas:
+    FrontendConfig:
+      type: object
+      additionalProperties: false
+      required:
+       - oAuth2
+      properties:
+        oAuth2:
+          type: object
+          additionalProperties: false
+          required:
+           - authUrl
+           - tokenUrl
+           - clientId
+           - redirectUri
+          properties:
+            authUrl:
+              type: string
+            tokenUrl:
+              type: string
+            clientId:
+              type: string
+            redirectUri:
+              type: string

@@ -67,7 +67,7 @@ export const LoginPage: Component = () => {
 
   const denyHandler = async (_: MouseEvent) => {
     const loginChallenge = localStorage.getItem("loginChallenge");
-    if (loginChallenge !== null) {
+    if (loginChallenge == null) {
       return
     }
 

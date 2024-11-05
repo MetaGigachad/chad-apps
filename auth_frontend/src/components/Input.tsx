@@ -41,7 +41,7 @@ export const Input: Component<InputProps> = (props) => {
         onInput={handleInput}
         ref={props.ref}
         autofocus={props.autofocus}
-        class="mt-1 w-full rounded-md border border-gray-600 bg-transparent p-2 outline-none dark:border-gray-200"
+        class="mt-1 w-full rounded-md border border-zinc-600 bg-transparent p-2 outline-none dark:border-zinc-200"
         classList={{
           "border-red-500 dark:border-red-500": hasError(),
         }}

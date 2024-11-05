@@ -51,6 +51,7 @@ stringData:
       adminUrl: http://hydra-admin
       clients:
 {{ list $.Values.onboarding.oauth2Client | toYaml | indent 8 }}
+{{ list $.Values.training.oauth2Client | toYaml | indent 8 }}
     httpServer:
       host: 0.0.0.0
       port: 80

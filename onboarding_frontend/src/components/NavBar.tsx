@@ -14,7 +14,7 @@ export interface NavBarProps {
 export const NavBar: Component<NavBarProps> = (props) => {
   const navigate = useNavigate();
   return (
-    <div class="ml-6 flex min-w-56 flex-col gap-1 place-self-start rounded-2xl bg-gray-100 p-4 text-xl text-gray-600 dark:bg-gray-800 dark:text-gray-200">
+    <div class="ml-6 flex min-w-56 flex-col gap-1 place-self-start rounded-2xl bg-zinc-100 p-4 text-xl text-zinc-600 dark:bg-zinc-800 dark:text-zinc-200">
       <For
         each={[
           { id: Button.EDIT_PLAN, icon: "edit", label: "Edit plan", route: "/editPlan" },
@@ -26,8 +26,8 @@ export const NavBar: Component<NavBarProps> = (props) => {
           <button
             class="flex gap-2 rounded-xl p-1 pl-2 pr-4"
             classList={{
-              "dark:bg-gray-200 dark:text-gray-800": props.selected === meta.id,
-              "transition hover:dark:bg-gray-600": props.selected !== meta.id,
+              "dark:bg-zinc-200 dark:text-zinc-800": props.selected === meta.id,
+              "transition hover:dark:bg-zinc-600": props.selected !== meta.id,
             }}
             onClick={() => navigate(meta.route)}
           >

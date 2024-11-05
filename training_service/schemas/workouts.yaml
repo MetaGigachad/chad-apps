@@ -1,0 +1,23 @@
+components:
+  schemas:
+    WorkoutDescriptor:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - groups
+        - editedAt
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        groups:
+          type: array
+          items:
+            type: string
+        editedAt:
+          type: integer
+          description: milliseconds since epoch
+          format: int64

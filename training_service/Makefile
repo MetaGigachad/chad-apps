@@ -58,7 +58,7 @@ dist-clean:
 # Install
 .PHONY: install-debug install-release
 install-debug install-release: install-%: build-%
-	cmake --install build_$* -v --component pg_service_template
+	cmake --install build_$* -v --component training_service
 
 .PHONY: install
 install: install-release
@@ -75,9 +75,9 @@ export DB_CONNECTION := postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@servi
 # Internal hidden targets that are used only in docker environment
 --in-docker-start-debug --in-docker-start-release: --in-docker-start-%: install-%
 	psql ${DB_CONNECTION} -f ./postgresql/data/initial_data.sql
-	/home/user/.local/bin/pg_service_template \
-		--config /home/user/.local/etc/pg_service_template/static_config.yaml \
-		--config_vars /home/user/.local/etc/pg_service_template/config_vars.docker.yaml
+	/home/user/.local/bin/training_service \
+		--config /home/user/.local/etc/training_service/static_config.yaml \
+		--config_vars /home/user/.local/etc/training_service/config_vars.docker.yaml
 
 # Build and run service in docker environment
 .PHONY: docker-start-service-debug docker-start-service-release
@@ -94,3 +94,26 @@ docker-cmake-debug docker-build-debug docker-test-debug docker-clean-debug docke
 docker-clean-data:
 	$(DOCKER_COMPOSE) down -v
 	rm -rf ./.pgdata
+
+.PHONY: start-dev-container
+create-dev-container:
+	docker run \
+		-v .:/pg_service_template:rw \
+		-v ./.cores:/cores:rw \
+		--name training-service-dev-container \
+		--workdir /pg_service_template \
+		-d \
+		ghcr.io/userver-framework/ubuntu-22.04-userver-pg:latest \
+		./tests/run_as_user.sh /bin/bash -c 'while true; do sleep 10; done'
+
+.PHONY: start-dev-container
+start-dev-container:
+	docker start training-service-dev-container
+
+.PHONY: attach-to-dev-container
+attach-to-dev-container:
+	docker exec -ti -u user training-service-dev-container /bin/zsh
+
+.PHONY: stop-dev-container
+stop-dev-container:
+	docker stop training-service-dev-container

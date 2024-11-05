@@ -18,11 +18,11 @@ export const Header: Component = () => {
   });
 
   return (
-    <div class="mx-6 flex p-3 text-3xl font-bold text-gray-200 items-center">
+    <div class="mx-6 flex p-3 text-3xl font-bold text-zinc-200 items-center">
       <h1 class="text-3xl">Onboarding control plane</h1>
       <Show when={!loading()} fallback={<div class="loader ml-auto"></div>}>
         <button
-          class="ml-auto text-2xl hover:text-gray-400"
+          class="ml-auto text-2xl hover:text-zinc-400"
           onClick={async () => {
             await methods().logout();
           }}

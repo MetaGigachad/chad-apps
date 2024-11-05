@@ -17,15 +17,12 @@ import { Portal } from "solid-js/web";
 
 export function PlansPage() {
   return (
-    <>
-      <Header />
-      <div class="mt-2 flex gap-4 text-gray-200">
-        <NavBar selected={Button.PLANS} />
-        <div class="mb-6 mr-6 flex max-w-full flex-wrap gap-4 rounded-2xl bg-gray-800 p-4">
-          <PlansList />
-        </div>
+    <div class="mt-2 flex gap-4 text-zinc-200">
+      <NavBar selected={Button.PLANS} />
+      <div class="mb-6 mr-6 flex max-w-full flex-wrap gap-4 rounded-2xl bg-zinc-800 p-4">
+        <PlansList />
       </div>
-    </>
+    </div>
   );
 }
 
@@ -52,7 +49,7 @@ export function PlansList() {
 
   return (
     <div class="w-96 flex flex-col gap-2">
-      <div class="flex flex-col overflow-hidden divide-y divide-dotted divide-gray-600 rounded-xl dark:bg-gray-700">
+      <div class="flex flex-col overflow-hidden divide-y divide-dotted divide-zinc-600 rounded-xl dark:bg-zinc-700">
         <div class="flex">
           <NewPlanButton onCreate={updatePlans} />
         </div>
@@ -60,7 +57,7 @@ export function PlansList() {
           when={!loading()}
           fallback={
             <div class="divide-solid">
-              <div class="loader ml-auto mr-auto m-2 text-gray-400"></div>
+              <div class="loader ml-auto mr-auto m-2 text-zinc-400"></div>
             </div>
           }
         >
@@ -113,7 +110,7 @@ export function Plan(props: { plan: Plan; updatePlans: () => Promise<void> }) {
   return (
     <>
       <div
-        class="flex items-center p-2 dark:bg-gray-700 hover:dark:bg-gray-600 cursor-pointer"
+        class="flex items-center p-2 dark:bg-zinc-700 hover:dark:bg-zinc-600 cursor-pointer"
         onMouseEnter={(_) => setShowControls(true)}
         onMouseLeave={(_) => setShowControls(false)}
         onClick={async () => {
@@ -127,7 +124,7 @@ export function Plan(props: { plan: Plan; updatePlans: () => Promise<void> }) {
           class="flex gap-2"
         >
           <button
-            class="dark:text-gray-400 hover:dark:text-gray-300"
+            class="dark:text-zinc-400 hover:dark:text-zinc-300"
             onClick={(e) => {
               setShowDeployOverlay(true);
               e.stopPropagation();
@@ -136,7 +133,7 @@ export function Plan(props: { plan: Plan; updatePlans: () => Promise<void> }) {
             <span class="material-symbols-outlined text-md">rocket_launch</span>
           </button>
           <button
-            class="dark:text-gray-400 hover:dark:text-gray-300"
+            class="dark:text-zinc-400 hover:dark:text-zinc-300"
             onClick={(e) => {
               deletePlan();
               e.stopPropagation();
@@ -162,7 +159,7 @@ export function NewPlanButton(props: { onCreate: () => Promise<void> }) {
 
   return (
     <button
-      class="flex gap-1 items-center p-2 py-3 pr-3 font-bold dark:bg-gray-700 hover:dark:bg-gray-600"
+      class="flex gap-1 items-center p-2 py-3 pr-3 font-bold dark:bg-zinc-700 hover:dark:bg-zinc-600"
       onClick={() => setShowOverlay(true)}
     >
       <span class="material-symbols-outlined">add</span>
@@ -180,9 +177,9 @@ export function NewPlanButton(props: { onCreate: () => Promise<void> }) {
 export function BaseOverlay(props: ParentProps) {
   return (
     <Portal mount={document.querySelector("#popUpRoot")!}>
-      <div class="fixed w-screen min-h-screen left-0 top-0 flex flex-col justify-center items-center bg-gray-950 opacity-90"></div>
+      <div class="fixed w-screen min-h-screen left-0 top-0 flex flex-col justify-center items-center bg-zinc-950 opacity-90"></div>
       <div class="fixed w-screen min-h-screen left-0 top-0 flex flex-col justify-center items-center font-normal">
-        <div class="flex flex-col gap-1 rounded-xl p-2 dark:bg-gray-700 w-96 dark:text-gray-200">
+        <div class="flex flex-col gap-1 rounded-xl p-2 dark:bg-zinc-700 w-96 dark:text-zinc-200">
           {props.children}
         </div>
       </div>
@@ -219,7 +216,7 @@ export function NewPlanOverlay(props: {
       <div class="flex justify-between items-center text-2xl px-3 py-2">
         <div class="font-bold">New plan</div>
         <button
-          class="rounded-md flex flex-col justify-center items-center hover:dark:bg-gray-600"
+          class="rounded-md flex flex-col justify-center items-center hover:dark:bg-zinc-600"
           onClick={(_) => props.hideOverlay()}
         >
           <span class="material-symbols-outlined text-2xl">close</span>
@@ -267,7 +264,7 @@ export function DeployOverlay(props: {
       <div class="flex justify-between items-center text-2xl px-3 py-2">
         <div class="font-bold">Deploy</div>
         <button
-          class="rounded-md flex flex-col justify-center items-center hover:dark:bg-gray-600"
+          class="rounded-md flex flex-col justify-center items-center hover:dark:bg-zinc-600"
           onClick={(_) => props.hideOverlay()}
         >
           <span class="material-symbols-outlined text-2xl">close</span>
@@ -304,10 +301,10 @@ export function ButtonWithLoader(
     <button
       class="mt-1 p-1 rounded-md font-bold"
       classList={{
-        "dark:text-gray-700 dark:bg-gray-300 hover:dark:bg-gray-200":
+        "dark:text-zinc-700 dark:bg-zinc-300 hover:dark:bg-zinc-200":
           !loading() && !clicked(),
-        "dark:text-gray-300": loading(),
-        "dark:text-gray-700 dark:bg-gray-300": !loading() && clicked(),
+        "dark:text-zinc-300": loading(),
+        "dark:text-zinc-700 dark:bg-zinc-300": !loading() && clicked(),
       }}
       disabled={clicked()}
       onClick={onClick}
@@ -326,7 +323,7 @@ export function EntryEditor(props: JSX.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      class="resize-y rounded-lg border border-gray-400 bg-gray-700 px-2 py-1 text-md text-gray-200 focus:border-gray-200 focus:outline-none"
+      class="resize-y rounded-lg border border-zinc-400 bg-zinc-700 px-2 py-1 text-md text-zinc-200 focus:border-zinc-200 focus:outline-none"
       type="text"
       autocomplete="off"
     ></input>

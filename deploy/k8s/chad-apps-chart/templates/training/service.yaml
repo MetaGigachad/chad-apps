@@ -1,0 +1,214 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: training-service
+spec:
+  selector:
+    app: training-service
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: training-service
+spec:
+  selector:
+    matchLabels:
+      app: training-service
+  template:
+    metadata:
+      labels:
+        app: training-service
+    spec:
+      initContainers:
+      - name: migrations
+        image: migrate/migrate:v4.18.1
+        args:
+          [
+            "-path", "/migrations",
+            "-database", "postgresql://service:{{ $.Values.training.postgres.passwords.service }}@training-postgres:5432/service?sslmode=disable&search_path=public",
+            "up"
+          ]
+        volumeMounts:
+        - name: migration-files
+          mountPath: /migrations
+      containers:
+      - name: training-service
+        image: {{ $.Values.training.service.image }}
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: config-volume
+          mountPath: /root/app/etc/training_service/static_config.yaml
+          subPath: static_config.yaml
+      volumes:
+      - name: config-volume
+        secret:
+          secretName: training-service-config
+      - name: migration-files
+        configMap:
+          name: training-service-migration-files
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: training-service-config
+type: Opaque
+stringData:
+  static_config.yaml: |
+    components_manager:
+      task_processors:
+        main-task-processor:
+          worker_threads: 1
+        fs-task-processor:
+          worker_threads: 1
+      default_task_processor: main-task-processor
+      components:
+        server:
+          listener:
+            port: 80
+            task_processor: main-task-processor
+        logging:
+          fs-task-processor: fs-task-processor
+          loggers:
+            default:
+              file_path: '@stderr'
+              level: debug
+              overflow_behavior: discard
+        dynamic-config:
+          defaults:
+            HTTP_CLIENT_CONNECTION_POOL_SIZE: 1000
+            POSTGRES_DEFAULT_COMMAND_CONTROL:
+              network_timeout_ms: 750
+              statement_timeout_ms: 500
+        testsuite-support: {}
+        http-client:
+          load-enabled: true
+          fs-task-processor: fs-task-processor
+        tests-control:
+          load-enabled: false
+          path: /tests/{action}
+          method: POST
+          task_processor: main-task-processor
+        handler-ping:
+          path: /api/ping
+          method: GET
+          task_processor: main-task-processor
+          throttling_enabled: false
+          url_trailing_slash: strict-match
+        handler-config:
+          path: /api/config
+          method: GET
+          task_processor: main-task-processor
+          frontendConfig:
+            oAuth2:
+              authUrl: https://auth.metachad.duckdns.org/oauth2/auth
+              tokenUrl: https://auth.metachad.duckdns.org/oauth2/token
+              clientId: {{ $.Values.training.oauth2Client.id }}
+              redirectUri: {{ index $.Values.training.oauth2Client.redirectUris 0 }}
+            
+        handler-workouts:
+          path: /api/workouts
+          method: GET
+          task_processor: main-task-processor
+          auth:
+            types:
+              - bearer
+        postgres-db-1:
+          dbconnection: postgresql://service:{{ $.Values.training.postgres.passwords.service }}@training-postgres.default.svc.cluster.local:5432/service
+          blocking_task_processor: fs-task-processor
+          dns_resolver: async
+          sync-start: false
+          connlimit_mode: manual
+        dns-client:
+          fs-task-processor: fs-task-processor
+        auth-endpoint:
+          url: http://hydra-admin.default.svc.cluster.local
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: training-service-migration-files
+data:
+  1_initial.up.sql: |
+    CREATE SCHEMA IF NOT EXISTS service;
+
+    CREATE TABLE IF NOT EXISTS service.users (
+        id SERIAL PRIMARY KEY,
+        oauth2_id VARCHAR(255) NOT NULL UNIQUE,
+        name VARCHAR(255) NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS service.workouts (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        owner_id INT NOT NULL,
+        edited_at BIGINT NOT NULL,
+            CONSTRAINT fk_workouts_owner
+                FOREIGN KEY (owner_id) REFERENCES service.users(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS service.exercises (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        sets INT NOT NULL,
+        rep_range INT[] NOT NULL, -- Array of two numbers for the rep range
+        body_weight BOOLEAN NOT NULL,
+        muscle_groups TEXT[] NOT NULL, -- Array of strings for muscle groups
+        owner_id INT NOT NULL,
+            CONSTRAINT fk_workouts_owner
+                FOREIGN KEY (owner_id) REFERENCES service.users(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS service.workout_exercises (
+        workout_id INT NOT NULL,
+        exercise_id INT NOT NULL,
+        PRIMARY KEY (workout_id, exercise_id),
+        FOREIGN KEY (workout_id) REFERENCES service.workouts(id) ON DELETE CASCADE,
+        FOREIGN KEY (exercise_id) REFERENCES service.exercises(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS service.workout_muscle_groups (
+        workout_id INT PRIMARY KEY,
+        muscle_groups TEXT[] NOT NULL,
+        FOREIGN KEY (workout_id) REFERENCES service.workouts(id) ON DELETE CASCADE
+    );
+
+    CREATE OR REPLACE FUNCTION update_workout_muscle_groups() RETURNS TRIGGER AS $$
+    BEGIN
+        -- Update the workout_muscle_groups table with the union of muscle groups
+        UPDATE service.workout_muscle_groups
+        SET muscle_groups = (
+            SELECT ARRAY(SELECT DISTINCT unnest(e.muscle_groups))
+            FROM service.exercises e
+            JOIN service.workout_exercises we ON e.id = we.exercise_id
+            WHERE we.workout_id = NEW.workout_id
+        )
+        WHERE workout_id = NEW.workout_id;
+
+        RETURN NEW;
+    END;
+    $$ LANGUAGE plpgsql;
+
+    -- Trigger to update muscle groups when exercises are added to a workout
+    CREATE TRIGGER trg_update_workout_muscle_groups
+    AFTER INSERT OR DELETE ON service.workout_exercises
+    FOR EACH ROW
+    EXECUTE FUNCTION update_workout_muscle_groups();
+
+  1_initial.down.sql: |
+    DROP TRIGGER IF EXISTS trg_update_workout_muscle_groups ON service.workout_exercises;
+    DROP FUNCTION IF EXISTS service.update_workout_muscle_groups;
+
+    DROP TABLE IF EXISTS service.workout_muscle_groups;
+    DROP TABLE IF EXISTS service.workout_exercises;
+    DROP TABLE IF EXISTS service.exercises;
+    DROP TABLE IF EXISTS service.workouts;
+    DROP TABLE IF EXISTS service.users;
+
+    DROP SCHEMA IF EXISTS service CASCADE;
+      DROP TABLE users;

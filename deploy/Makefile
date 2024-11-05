@@ -1,7 +1,7 @@
 DOCKERFILES_DIR ?= deploy/docker
 PROJECT_ROOT ?= ..
 IMAGE_PREFIX ?= metagigachad/private:chad_apps
-VALID_NAMES := auth_frontend onboarding_frontend auth_service onboarding_service
+VALID_NAMES := auth_frontend onboarding_frontend auth_service onboarding_service training_frontend training_service
 
 IMAGE = $(IMAGE_PREFIX)-$*
 

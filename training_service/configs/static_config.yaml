@@ -35,7 +35,7 @@ components_manager:
         testsuite-support: {}
 
         http-client:
-            load-enabled: $is-testing
+            load-enabled: true
             fs-task-processor: fs-task-processor
 
         tests-control:
@@ -50,10 +50,10 @@ components_manager:
             throttling_enabled: false
             url_trailing_slash: strict-match
 
-        handler-workouts:                    # Finally! Our handler.
-            path: /workouts               # Registering handler by URL '/v1/hello'.
-            method: GET                  # It will only reply to POST requests.
-            task_processor: main-task-processor  # Run it on CPU bound task processor
+        handler-workouts:
+            path: /workouts
+            method: GET
+            task_processor: main-task-processor
             auth:
               types:
                 - bearer
@@ -69,11 +69,5 @@ components_manager:
         dns-client:
             fs-task-processor: fs-task-processor
 
-
         auth-endpoint:
             url: http://hydra:4445
-
-        # auth-middleware: {}
-        # default-server-middleware-pipeline-builder:
-        #     append:
-        #       - auth-middleware

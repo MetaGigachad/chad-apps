@@ -18,19 +18,19 @@ export function ButtonWithDropdown<T extends JSX.Element>({onChange, ...props}: 
   return (
     <div class="relative" use:clickOutside={() => setShowDropdown(false)}>
       <button
-        class="rounded-md p-1 px-2 font-bold hover:bg-gray-600"
+        class="rounded-md p-1 px-2 font-bold hover:bg-zinc-600"
         onClick={(e) => setShowDropdown((x) => !x)}
       >
         {value()}
       </button>
       <Show when={showDropdown()}>
-        <div class="absolute left-1/2 top-full m-auto flex -translate-x-1/2 translate-y-1 flex-col gap-1 rounded-lg bg-gray-900 p-1">
+        <div class="absolute left-1/2 top-full m-auto flex -translate-x-1/2 translate-y-1 flex-col gap-1 rounded-lg bg-zinc-900 p-1">
           <For each={props.values}>
             {(val, i) => (
               <button
-                class="text-nowrap rounded-md px-1 text-left font-medium hover:bg-gray-200 hover:text-gray-800"
+                class="text-nowrap rounded-md px-1 text-left font-medium hover:bg-zinc-200 hover:text-zinc-800"
                 classList={{
-                  "dark:bg-gray-200 dark:text-gray-800": i() === props.current,
+                  "dark:bg-zinc-200 dark:text-zinc-800": i() === props.current,
                 }}
                 onClick={(_) => {
                   setValue((_) => val);

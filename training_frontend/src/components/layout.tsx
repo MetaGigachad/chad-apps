@@ -1,47 +1,18 @@
-import { ParentProps, Show, createSignal, mergeProps, onMount, useContext } from "solid-js";
-import { UserContext } from "../contexts/UserContext";
+import { ParentProps, Show, mergeProps, useContext } from "solid-js";
 import { Icon } from "./utils";
-import { ThemeContext } from "../contexts/ThemeContext";
+import { ThemeContext, useLoggedInUser, useLoggedOutUser, UserContext } from "@metachad/frontend-common";
 
 export function Layout(props: ParentProps) {
   return (
-    <Root>
-      <FontLoader>
-        <Body>{props.children}</Body>
-      </FontLoader>
-    </Root>
+    <Body>{props.children}</Body>
   );
 }
 
-function FontLoader(props: ParentProps) {
-  const [loadingFonts, setLoadingFonts] = createSignal(true);
-
-  onMount(async () => {
-    await Promise.all([
-      document.fonts.load('16px "Squada One"'),
-      document.fonts.load('16px "Material Symbols Outlined"')
-    ]).then(() => {
-      console.log('Both fonts have successfully loaded.');
-      setLoadingFonts(false);
-    }).catch(() => {
-      console.log('One or both fonts failed to load.');
-    });
-  })
-
-  return (
-    <Show when={loadingFonts()} fallback={props.children}>
-      <div class="w-screen h-screen flex items-center justify-center">
-      <div class="loader"></div>
-      </div>
-    </Show>
-  );
-}
-
-function Root(props: ParentProps) {
-  const theme = useContext(ThemeContext)!;
+export function Root(props: ParentProps) {
+  const [theme] = useContext(ThemeContext)!;
   return (
     <div
-      classList={{ dark: theme.value !== "dark" }}
+      classList={{ dark: theme() !== "dark" || true }}
       class="transition-colors dark:bg-zinc-900 dark:text-zinc-200"
       id="root"
     >
@@ -71,23 +42,40 @@ function Header() {
 }
 
 function LoginInfo() {
-  const user = useContext(UserContext)!;
+  const [user] = useContext(UserContext)!;
   return (
-    <Show when={user.loggedIn} fallback={<LoginButton />}>
-      <UserIcon />
+    <Show when={user.state !== "loggedOut"} fallback={<LoginButton />}>
+      <LogoutButton />
     </Show>
   );
 }
 
 function LoginButton(propsRaw: { disabled?: boolean }) {
+  const [_, methods] = useLoggedOutUser();
   const props = mergeProps({ disabled: false } as const, propsRaw);
   return (
     <button
       disabled={props.disabled}
       class="flex gap-0.5 rounded-full border border-current pb-1 pl-1 pr-2 pt-0.5 enabled:dark:hover:text-blue-300 disabled:dark:text-zinc-400"
+      onClick={async () => await methods().login()}
     >
       <Icon name="login" class="" />
       <span class="font-semibold">Log in</span>
+    </button>
+  );
+}
+
+function LogoutButton(propsRaw: { disabled?: boolean }) {
+  const [_, methods] = useLoggedInUser();
+  const props = mergeProps({ disabled: false } as const, propsRaw);
+  return (
+    <button
+      disabled={props.disabled}
+      class="flex gap-0.5 rounded-full border border-current pb-1 pl-1 pr-2 pt-0.5 enabled:dark:hover:text-blue-300 disabled:dark:text-zinc-400"
+      onClick={async () => await methods().logout()}
+    >
+      <Icon name="logout" class="" />
+      <span class="font-semibold">Log out</span>
     </button>
   );
 }

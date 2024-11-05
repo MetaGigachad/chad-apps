@@ -1,4 +1,4 @@
-import { Match, ParentProps, Switch, createContext, createResource} from "solid-js";
+import { Match, ParentProps, Switch, createContext, createResource } from "solid-js";
 
 export interface ConfigType {
   oAuth2: {

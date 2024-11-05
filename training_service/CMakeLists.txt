@@ -45,8 +45,10 @@ userver_target_generate_chaotic(${PROJECT_NAME}_chgen
 add_library(${PROJECT_NAME}_objs OBJECT
     src/auth_middleware.hpp
     src/auth_middleware.cpp
-    src/workouts.hpp
-    src/workouts.cpp
+    src/workouts_handler.hpp
+    src/workouts_handler.cpp
+    src/config_handler.hpp
+    src/config_handler.cpp
 )
 target_link_libraries(${PROJECT_NAME}_objs PUBLIC userver::postgresql ${PROJECT_NAME}_chgen)
 
