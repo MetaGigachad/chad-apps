@@ -2,7 +2,7 @@ import { randomString } from "../utils/rand";
 import { makePersisted } from "@solid-primitives/storage";
 import base64url from "base64url";
 import {
-    Accessor,
+  Accessor,
   ParentProps,
   createEffect,
   createMemo,
@@ -26,13 +26,31 @@ export function useLoggedOutUser() {
 }
 
 export function UserProvider(rawProps: UserProviderProps) {
-  const props = mergeProps(rawProps, { localStorageKey: "user" });
-  console.log("Using v1.0.0");
+  const props = mergeProps({ localStorageKey: "user", devMode: false }, rawProps);
 
   const [context, setContext] = makePersisted(
     createStore<UserContextDataType>({ state: "loggedOut" }),
     { name: props.localStorageKey },
   );
+
+  onMount(() => {
+    if (props.devMode) {
+      const newContext: UserContextDataType = {
+        state: "loggedIn",
+        data: {
+          access_token: "access-token",
+          expires_in: 9999999999,
+          id_token: "id-token",
+          refresh_token: "refresh-token",
+          scope: "openid offline",
+          token_type: "bearer",
+        },
+        refreshedAt: Date.now(),
+        checked: true,
+      };
+      setContext(reconcile(newContext));
+    }
+  });
 
   const methods: Accessor<UserContextMethodsType> = createMemo(() => {
     switch (context.state) {
@@ -44,8 +62,6 @@ export function UserProvider(rawProps: UserProviderProps) {
         return {};
     }
   });
-  createEffect(() => 
-  console.log("common", context, methods));
 
   async function login() {
     const newContext: UserContextDataType = {
@@ -78,7 +94,6 @@ export function UserProvider(rawProps: UserProviderProps) {
       state: data.state,
     });
 
-    console.log("redirecting to ", `${props.oauth2Config.authUrl}?${params.toString()}`);
     window.location.assign(
       `${props.oauth2Config.authUrl}?${params.toString()}`,
     );
@@ -98,14 +113,14 @@ export function UserProvider(rawProps: UserProviderProps) {
 
     const error = urlParams.get("error");
     if (error === "access_denied") {
-      setContext(reconcile({state: "loggedOut"}));
+      setContext(reconcile({ state: "loggedOut" }));
       return;
     }
 
     const code = urlParams.get("code");
     if (code == null) {
       console.log(`Authorization code wasn't provided by OAuth2 endpoint`);
-      setContext(reconcile({state: "loggedOut"}));
+      setContext(reconcile({ state: "loggedOut" }));
       return;
     }
 
@@ -126,7 +141,7 @@ export function UserProvider(rawProps: UserProviderProps) {
     });
     if (!res.ok) {
       console.log(`Code for tokens exchange failed: ${res.status}`);
-      setContext(reconcile({state: "loggedOut"}));
+      setContext(reconcile({ state: "loggedOut" }));
       return;
     }
     const oauth2Data: OAuth2Data = await res.json();
@@ -198,7 +213,6 @@ export function UserProvider(rawProps: UserProviderProps) {
     const newContext: UserContextDataType = {
       state: "loggedOut",
     };
-    console.log("loggin out");
     setContext(reconcile(newContext));
   }
 
@@ -262,6 +276,7 @@ interface RefreshResponse {
 type UserProviderProps = ParentProps & {
   oauth2Config: OAuth2Config;
   localStorageKey?: string;
+  devMode?: boolean;
 };
 
 interface OAuth2Config {

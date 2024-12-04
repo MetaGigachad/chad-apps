@@ -4,18 +4,21 @@ import {
   ParentProps,
   Show,
   Switch,
-  createContext,
   createResource,
+  createSignal,
   useContext,
 } from "solid-js";
 import { Nav } from "./nav";
-import { localStore, prettyDate } from "../utils";
+import { prettyDate } from "../utils";
 import { ViewportContext } from "../contexts/ViewportContext";
 import { WorkoutViewer } from "./workoutViewer";
-import { Workout, WorkoutDescriptor, fetchWorkouts } from "../fetch";
 import { WorkoutEditor } from "./workoutEditor";
 import { MuscleGroupsCell } from "./muscleGroups";
 import { Button } from "../buttons";
+import { CreateWorkoutOverlay } from "../overlays/createWorkoutOverlay";
+import { ApiContext } from "../contexts/ApiContext";
+import { WorkoutDescription } from "../api";
+import { SubpageContext, SubpageProvider } from "../contexts/SubpageContext";
 
 export function WorkoutsPageMain() {
   return (
@@ -40,41 +43,18 @@ export function MainContainer(props: ParentProps) {
   );
 }
 
-export const SubpageContext = createContext<SubpageInfo>();
-interface SubpageInfo {
-  page: WorkoutsPage;
-  navigate: (page: WorkoutsPage) => void;
-}
-type WorkoutsPage = { name: "list" } | { name: "viewer"; id: string } | { name: "editor"; workout: Workout };
-function SubpageProvider(props: ParentProps) {
-  const [info, setInfo] = localStore<SubpageInfo>("workouts/page", {
-    page: { name: "list" },
-    navigate,
-  });
-
-  function navigate(page: WorkoutsPage) {
-    setInfo("page", page);
-  }
-
-  return (
-    <SubpageContext.Provider value={info}>
-      {props.children}
-    </SubpageContext.Provider>
-  );
-}
-
 function WorkoutsSubpage() {
-  const subpage = useContext(SubpageContext)!;
+  const [subpage] = useContext(SubpageContext)!;
 
   return (
     <Switch>
-      <Match when={subpage.page.name === "list"}>
+      <Match when={subpage().name === "list"}>
         <ListSubpage />
       </Match>
-      <Match when={subpage.page.name === "viewer"}>
+      <Match when={subpage().name === "viewer"}>
         <WorkoutViewer />
       </Match>
-      <Match when={subpage.page.name === "editor"}>
+      <Match when={subpage().name === "editor"}>
         <WorkoutEditor />
       </Match>
     </Switch>
@@ -82,11 +62,12 @@ function WorkoutsSubpage() {
 }
 
 function ListSubpage() {
-  const [workouts] = createResource(fetchWorkouts);
+  const api = useContext(ApiContext)!;
+  const [workouts] = createResource(async () => await api().getWorkouts());
 
   return (
     <Show when={!workouts.loading}>
-      <div class="flex md:flex-col h-full flex-col-reverse">
+      <div class="flex h-full flex-col-reverse md:flex-col">
         <WorkoutListControls />
         <WorkoutsList workouts={workouts()!} />
       </div>
@@ -97,54 +78,67 @@ function ListSubpage() {
 function WorkoutListControls() {
   return (
     <div class="flex items-center pt-2 md:pt-0">
-    <div class="flex mx-auto md:mx-0 md:flex-grow-0">
-      <Button
-        icon="add_2"
-        text="Create workout"
-      />
-    </div>
+      <div class="mx-auto flex md:mx-0 md:flex-grow-0">
+        <CreateWorkoutButton />
+      </div>
     </div>
   );
 }
 
-function WorkoutsList(props: { workouts: WorkoutDescriptor[] }) {
+function CreateWorkoutButton() {
+  const [showForm, setShowForm] = createSignal(false);
+  return (
+    <Button
+      onClick={() => setShowForm(true)}
+      icon="add_2"
+      text="Create workout"
+    >
+      <Show when={showForm()}>
+        <CreateWorkoutOverlay close={() => setShowForm(false)} />
+      </Show>
+    </Button>
+  );
+}
+
+function WorkoutsList(props: { workouts: WorkoutDescription[] }) {
   const viewport = useContext(ViewportContext)!;
 
   return (
-    <div class="flex-grow grid grid-cols-1 md:grid-cols-[3fr_3fr_1fr] overflow-y-scroll auto-cols-min">
-          <Show when={!viewport.mobile} fallback={
-        <div class="text-xl pl-2 pb-2 font-bold">Workouts</div>
-          }>
-            <div class="grid grid-cols-subgrid col-span-1 md:col-span-3 font-bold text-lg">
-              <div class="p-2 text-left col-start-1">Name</div>
-              <div class="p-2 text-left col-start-2">Muscle groups</div>
-              <div class="p-2 text-left col-start-3 w-32">Last edit</div>
-            </div>
-          </Show>
-        <div class="grid grid-cols-subgrid col-span-1 md:col-span-3 overflow-y-scroll">
-          <For each={props.workouts}>
-            {(w) => <WorkoutsListItem workout={w} />}
-          </For>
+    <div class="grid auto-cols-min grid-cols-1 overflow-y-scroll md:grid-cols-[3fr_3fr_1fr]" classList={{ "mb-auto": viewport.mobile }}>
+      <Show
+        when={!viewport.mobile}
+        fallback={<div class="pb-2 pl-2 text-xl font-bold">Workouts</div>}
+      >
+        <div class="col-span-1 grid grid-cols-subgrid text-lg font-bold md:col-span-3">
+          <div class="col-start-1 p-2 text-left">Name</div>
+          <div class="col-start-2 p-2 text-left">Muscle groups</div>
+          <div class="col-start-3 w-32 p-2 text-left">Last edit</div>
         </div>
+      </Show>
+      <div class="col-span-1 grid grid-cols-subgrid overflow-y-scroll md:col-span-3">
+        <For each={props.workouts}>
+          {(w) => <WorkoutsListItem workout={w} />}
+        </For>
+      </div>
     </div>
   );
 }
 
-function WorkoutsListItem(props: { workout: WorkoutDescriptor }) {
-  const subpage = useContext(SubpageContext)!;
+function WorkoutsListItem(props: { workout: WorkoutDescription }) {
+  const [_, navigate] = useContext(SubpageContext)!;
   const viewport = useContext(ViewportContext)!;
 
   return (
     <div
-      onClick={() => subpage.navigate({ name: "viewer", id: props.workout.id })}
-      class="grid rounded-md dark:hover:bg-zinc-700 grid-cols-subgrid col-span-1 md:col-span-3"
+      onClick={() => navigate({ name: "viewer", id: props.workout.id })}
+      class="col-span-1 grid grid-cols-subgrid rounded-md md:col-span-3 dark:hover:bg-zinc-700"
     >
-      <div class="px-2 py-1.5">{props.workout.name}</div>
+      <div class="px-2 py-1.5 break-all">{props.workout.name}</div>
       <Show when={!viewport.mobile}>
         <div class="px-2 py-1.5">
-          <MuscleGroupsCell groups={props.workout.groups} />
+          <MuscleGroupsCell groups={props.workout.muscleGroups} />
         </div>
-        <div class="px-2 py-1.5 dark:text-zinc-400 w-32">
+        <div class="w-32 px-2 py-1.5 dark:text-zinc-400">
           {prettyDate(props.workout.editedAt)}
         </div>
       </Show>

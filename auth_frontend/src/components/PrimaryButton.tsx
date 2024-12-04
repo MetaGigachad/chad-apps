@@ -10,7 +10,7 @@ interface PrimaryButtonProps {
 export const PrimaryButton: Component<PrimaryButtonProps> = (props) => (
   <button
     type={props.type}
-    class="w-32 self-center rounded-md px-4 py-2 transition-all "
+    class="w-32 self-center rounded-md px-4 py-2 transition-all font-bold "
     classList={{
       "bg-zinc-600 text-zinc-200 hover:bg-zinc-800 dark:bg-zinc-200 dark:text-zinc-600 dark:hover:bg-zinc-400":
         !props.disabled,

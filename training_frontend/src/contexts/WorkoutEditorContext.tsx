@@ -1,29 +1,41 @@
-import { ParentProps, batch, createContext, createSignal } from "solid-js";
-import { Exercise, Workout } from "../fetch";
-import { localStore } from "../utils";
+import { Accessor, ParentProps, batch, createContext, createSignal, useContext } from "solid-js";
+import { Workout, WorkoutExercise } from "../api";
+import { makePersisted } from "@solid-primitives/storage";
+import { createStore, unwrap } from "solid-js/store";
+import { ApiContext } from "./ApiContext";
+import { deepEqual, omit } from "@metachad/frontend-common";
 
-export const WorkoutEditorContext = createContext<WorkoutEditorInfo>();
-interface WorkoutEditorInfo {
-  workout: Workout;
+export const WorkoutEditorContext =
+  createContext<[Workout, Accessor<WorkoutEditorMethods>]>();
+
+interface WorkoutEditorMethods {
+  setName: (name: string) => void;
   isSelected: (exerciseId?: number) => boolean;
   selectToggle: (exerciseId: number) => void;
-  addBefore: (newExercise: Exercise) => void;
+  addBefore: (newExercise: WorkoutExercise) => void;
   remove: () => void;
   moveBackward: () => void;
   moveForward: () => void;
+  isChanged: () => boolean;
   revert: () => void;
-  setName: (name: string) => void;
+  save: () => Promise<void>;
 }
 
 export function WorkoutEditorProvider(props: ParentProps & { value: Workout }) {
-  const [workout, setWorkout] = localStore<Workout>("workouts/editor/workout", {
-    ...props.value,
+  const api = useContext(ApiContext)!;
+
+  const [workout, setWorkout] = makePersisted(createStore(props.value), {
+    name: "workouts/editor/workout",
   });
   if (workout.id !== props.value.id) {
     setWorkout(props.value);
   }
 
+  const [prevWorkout, setPrevWorkout] = createSignal(props.value);
+
   const [selectedExercise, setSelectedExercise] = createSignal<number>();
+
+  const setName = (name: string) => setWorkout("name", name);
 
   const getSelectedExercise = () => {
     let id = selectedExercise();
@@ -47,7 +59,7 @@ export function WorkoutEditorProvider(props: ParentProps & { value: Workout }) {
   const selectToggle = (exerciseId: number) =>
     setSelectedExercise((x) => (x === exerciseId ? undefined : exerciseId));
 
-  const addBefore = (newExercise: Exercise) => {
+  const addBefore = (newExercise: WorkoutExercise) => {
     const id = getSelectedExercise();
     setWorkout("exercises", (x) => [
       ...x.slice(0, id),
@@ -92,28 +104,35 @@ export function WorkoutEditorProvider(props: ParentProps & { value: Workout }) {
 
   const revert = () => {
     batch(() => {
-      setWorkout(props.value);
+      setWorkout(prevWorkout());
       setSelectedExercise(undefined);
     });
   };
 
-  const setName = (name: string) => setWorkout("name", name);
+  const save = async () => {
+    const res = await api().putWorkout({id: workout.id, putWorkoutRequest: {name: workout.name, exercises: workout.exercises}});
+    workout.editedAt = res.editedAt;
+    setPrevWorkout(structuredClone(unwrap(workout)));
+  };
 
-  const info = () =>
+  const isChanged = () => !deepEqual(workout, prevWorkout());
+
+  const methods = () =>
     ({
-      workout: workout,
+      setName,
       isSelected,
       selectToggle,
       addBefore,
       remove,
       moveBackward,
       moveForward,
+      isChanged,
       revert,
-      setName
-    }) as WorkoutEditorInfo;
+      save,
+    }) as WorkoutEditorMethods;
 
   return (
-    <WorkoutEditorContext.Provider value={info()}>
+    <WorkoutEditorContext.Provider value={[workout, methods]}>
       {props.children}
     </WorkoutEditorContext.Provider>
   );

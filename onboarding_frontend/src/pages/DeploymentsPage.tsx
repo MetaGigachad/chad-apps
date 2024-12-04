@@ -5,9 +5,9 @@ import { useLoggedInUser, apiFetch } from "@metachad/frontend-common"
 
 export function DeploymentsPage() {
   return (
-    <div class="mt-2 flex gap-4 text-zinc-200">
+    <div class="mt-2 flex gap-4 text-zinc-200 flex-col md:flex-row">
       <NavBar selected={Button.DEPLOYMENTS} />
-      <div class="mb-6 mr-6 flex max-w-full flex-wrap gap-4 rounded-2xl bg-zinc-800 p-4">
+      <div class="md:mb-6 md:mr-6 justify-center flex max-w-full flex-wrap gap-4 md:rounded-2xl bg-zinc-800 p-4">
         <DeploymentsList />
       </div>
     </div>

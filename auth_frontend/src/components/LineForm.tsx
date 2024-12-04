@@ -112,7 +112,7 @@ export const LineForm: Component<LineFormProps> = (props) => {
   };
 
   return (
-    <form class="flex flex-col" onSubmit={handleSubmit}>
+    <form class="flex flex-col flex-grow" onSubmit={handleSubmit}>
       <Index each={props.fields}>
         {(field, i) => <Input {...inputProps(field(), i)} />}
       </Index>

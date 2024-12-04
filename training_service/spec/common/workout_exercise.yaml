@@ -1,0 +1,34 @@
+components:
+  schemas:
+    WorkoutExercise:
+      allOf:
+        - $ref: '#/components/schemas/WorkoutExerciseRef'
+        - $ref: '#/components/schemas/WorkoutExerciseBody'
+    WorkoutExerciseRef:
+      type: object
+      additionalProperties: true
+      required:
+        - id
+      properties:
+        id:
+          type: string
+    WorkoutExerciseBody:
+      type: object
+      additionalProperties: true
+      required:
+        - exercise
+        - sets
+        - repRange
+      properties:
+        exercise:
+          $ref: './exercise.yaml#/components/schemas/Exercise'
+        sets:
+          type: integer
+          format: int32
+        repRange:
+          type: array
+          items:
+            type: integer
+            format: int32
+          minItems: 2
+          maxItems: 2

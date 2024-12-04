@@ -1,3 +1,4 @@
+{{- if $.Values.certificates.selfIssued }}
 # yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/trust.cert-manager.io/bundle_v1alpha1.json
 apiVersion: trust.cert-manager.io/v1alpha1
 kind: Bundle
@@ -66,3 +67,4 @@ spec:
         mountPath: /etc/ssl/certs/
         name: ca-certificates
         readOnly: true
+{{- end }}

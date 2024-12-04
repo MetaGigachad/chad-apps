@@ -19,6 +19,7 @@ import {
 } from "solid-js";
 import { createStore } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
+import { ViewportContext } from "../state/ViewportContext";
 
 let blockTypes = ["Feed info", "Assign task", "Meta"] as const;
 type BlockType = ArrayElement<typeof blockTypes>;
@@ -77,7 +78,7 @@ export const Plan: Component = () => {
   });
 
   return (
-    <div class="flex flex-col items-center gap-2 w-96">
+    <div class="flex flex-col items-center gap-2 w-full md:w-96">
       <Show
         when={editor.plan !== undefined}
         fallback={
@@ -164,7 +165,8 @@ export const BlockWithControls: Component<{
   defaultDay: number;
   showDelete: boolean;
 }> = (props) => {
-  const [show, setShow] = createSignal(false);
+  const viewport = useContext(ViewportContext)!;
+  const [show, setShow] = createSignal(false || viewport.mobile);
 
   let [newBlockDay, setNewBlockDay] = createSignal(props.defaultDay);
 
@@ -182,7 +184,7 @@ export const BlockWithControls: Component<{
   return (
     <div
       ref={ref!}
-      class="flex flex-col items-start gap-2 w-96"
+      class="flex flex-col items-start gap-2 w-full md:w-96"
       onMouseEnter={(_) => setShow(true)}
       onMouseLeave={(_) => setShow(false)}
     >
@@ -525,12 +527,13 @@ export const TextEditor: Component<{
   onChange: (newValue: string) => void;
   value: string;
 }> = (props) => {
+  const viewport = useContext(ViewportContext)!;
   return (
     <textarea
       placeholder={props.placeholder}
       class="resize-y rounded-lg border border-zinc-400 bg-zinc-700 px-2 py-1 text-sm text-zinc-200 focus:border-zinc-200 focus:outline-none"
       rows="6"
-      cols="26"
+      cols={viewport.mobile ? "10" : "26"}
       onChange={(e) => props.onChange(e.target.value)}
       value={props.value}
     ></textarea>

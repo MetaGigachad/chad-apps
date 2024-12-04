@@ -1,0 +1,15 @@
+components:
+  schemas:
+    MuscleGroup:
+      type: string
+      enum:
+        - chest
+        - back
+        - abs
+        - shoulders
+        - biceps
+        - triceps
+        - forearms
+        - quadriceps
+        - hamstrings
+        - calves

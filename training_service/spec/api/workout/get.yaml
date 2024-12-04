@@ -1,0 +1,4 @@
+components:
+  schemas:
+    GetWorkoutResponse:
+      $ref: '../../common/workout.yaml#/components/schemas/Workout'

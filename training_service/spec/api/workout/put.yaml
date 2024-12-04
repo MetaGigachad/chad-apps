@@ -1,0 +1,20 @@
+components:
+  schemas:
+    PutWorkoutRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        exercises:
+          type: array
+          items:
+            $ref: '../../common/workout_exercise.yaml#/components/schemas/WorkoutExercise'
+    PutWorkoutResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - editedAt
+      properties:
+        editedAt:
+          $ref: '../../common/timestamp.yaml#/components/schemas/Timestamp'

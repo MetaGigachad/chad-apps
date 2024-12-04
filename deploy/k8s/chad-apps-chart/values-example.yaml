@@ -1,6 +1,14 @@
+certificates:
+  selfIssued: true
+  email: johndoe@example.com
+
 auth:
   frontend:
     image: metagigachad/private:chad_apps-auth_frontend
+    bypass:
+      enable: false
+      externalName: host.minikube.internal
+      localPort: 9001
   service:
     image: metagigachad/private:chad_apps-auth_service
   postgres:
@@ -12,6 +20,10 @@ auth:
 onboarding:
   frontend:
     image: metagigachad/private:chad_apps-onboarding_frontend
+    bypass:
+      enable: false
+      externalName: host.minikube.internal
+      localPort: 9002
   service:
     image: metagigachad/private:chad_apps-onboarding_service
     botToken: change-this-4
@@ -24,6 +36,10 @@ onboarding:
 training:
   frontend:
     image: metagigachad/private:chad_apps-training_frontend
+    bypass:
+      enable: false
+      externalName: host.minikube.internal
+      localPort: 9000
   service:
     image: metagigachad/private:chad_apps-training_service
   postgres:

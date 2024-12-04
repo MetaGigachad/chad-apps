@@ -1,0 +1,12 @@
+components:
+  schemas:
+    PostWorkoutRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+      properties:
+        name:
+          type: string
+    PostWorkoutResponse:
+      $ref: '../../common/workout.yaml#/components/schemas/Workout'

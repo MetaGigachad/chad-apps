@@ -1,0 +1,464 @@
+openapi: 3.1.1
+info:
+  title: Training service
+  description: Backend for training app
+  version: 1.0.0
+servers:
+  - url: https://training.metachad.duckdns.org/api
+paths:
+  /config:
+    get:
+      operationId: getConfig
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetConfigResponse'
+  /workouts:
+    get:
+      operationId: getWorkouts
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetWorkoutsResponse'
+  /workout:
+    post:
+      operationId: postWorkout
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostWorkoutRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workout'
+  /workout/{id}:
+    get:
+      operationId: getWorkout
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workout'
+    put:
+      operationId: putWorkout
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutWorkoutRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PutWorkoutResponse'
+    delete:
+      operationId: deleteWorkout
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200': null
+  /exercises:
+    get:
+      operationId: getExercises
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetExercisesResponse'
+  /exercise:
+    post:
+      operationId: postExercise
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExerciseBody'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseRef'
+  /exercise/{id}:
+    delete:
+      operationId: deleteExercise
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200': null
+  /workoutLogs:
+    get:
+      operationId: getWorkoutLogs
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetWorkoutLogsResponse'
+  /workoutLog:
+    post:
+      operationId: postWorkoutLog
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostWorkoutLogRequest'
+      responses:
+        '200': {}
+  /workoutLog/{id}:
+    get:
+      operationId: getWorkoutLog
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkoutLog'
+    delete:
+      operationId: deleteWorkoutLog
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200': null
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: OAuth2
+  schemas:
+    GetConfigResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - oAuth2
+      properties:
+        oAuth2:
+          type: object
+          additionalProperties: false
+          required:
+            - authUrl
+            - tokenUrl
+            - clientId
+            - redirectUri
+          properties:
+            authUrl:
+              type: string
+            tokenUrl:
+              type: string
+            clientId:
+              type: string
+            redirectUri:
+              type: string
+    WorkoutRef:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          type: string
+    Timestamp:
+      type: integer
+      format: int64
+    MuscleGroup:
+      type: string
+      enum:
+        - chest
+        - back
+        - abs
+        - shoulders
+        - biceps
+        - triceps
+        - forearms
+        - quadriceps
+        - hamstrings
+        - calves
+    WorkoutHeader:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - editedAt
+        - muscleGroups
+      properties:
+        name:
+          type: string
+        editedAt:
+          $ref: '#/components/schemas/Timestamp'
+        muscleGroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/MuscleGroup'
+    WorkoutDescription:
+      allOf:
+        - $ref: '#/components/schemas/WorkoutRef'
+        - $ref: '#/components/schemas/WorkoutHeader'
+    GetWorkoutsResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/WorkoutDescription'
+    PostWorkoutRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+      properties:
+        name:
+          type: string
+    WorkoutExerciseRef:
+      type: object
+      additionalProperties: true
+      required:
+        - id
+      properties:
+        id:
+          type: string
+    ExerciseRef:
+      type: object
+      additionalProperties: true
+      required:
+        - id
+      properties:
+        id:
+          type: string
+    ExerciseBody:
+      type: object
+      additionalProperties: true
+      required:
+        - name
+        - bodyWeight
+        - muscleGroups
+      properties:
+        name:
+          type: string
+        bodyWeight:
+          type: boolean
+        muscleGroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/MuscleGroup'
+    Exercise:
+      allOf:
+        - $ref: '#/components/schemas/ExerciseRef'
+        - $ref: '#/components/schemas/ExerciseBody'
+    WorkoutExerciseBody:
+      type: object
+      additionalProperties: true
+      required:
+        - exercise
+        - sets
+        - repRange
+      properties:
+        exercise:
+          $ref: '#/components/schemas/Exercise'
+        sets:
+          type: integer
+          format: int32
+        repRange:
+          type: array
+          items:
+            type: integer
+            format: int32
+          minItems: 2
+          maxItems: 2
+    WorkoutExercise:
+      allOf:
+        - $ref: '#/components/schemas/WorkoutExerciseRef'
+        - $ref: '#/components/schemas/WorkoutExerciseBody'
+    WorkoutBody:
+      type: object
+      additionalProperties: false
+      required:
+        - exercises
+      properties:
+        exercises:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkoutExercise'
+    Workout:
+      allOf:
+        - $ref: '#/components/schemas/WorkoutRef'
+        - $ref: '#/components/schemas/WorkoutHeader'
+        - $ref: '#/components/schemas/WorkoutBody'
+    PutWorkoutRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        exercises:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkoutExercise'
+    PutWorkoutResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - editedAt
+      properties:
+        editedAt:
+          $ref: '#/components/schemas/Timestamp'
+    GetExercisesResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/Exercise'
+    WorkoutLogRef:
+      type: object
+      additionalProperties: true
+      required:
+        - id
+      properties:
+        id:
+          type: string
+    WorkoutLogHeader:
+      type: object
+      additionalProperties: true
+      required:
+        - name
+        - baseWorkoutRef
+        - startedAt
+        - endedAt
+        - muscleGroups
+      properties:
+        name:
+          type: string
+        baseWorkoutRef:
+          $ref: '#/components/schemas/WorkoutRef'
+        startedAt:
+          $ref: '#/components/schemas/Timestamp'
+        endedAt:
+          $ref: '#/components/schemas/Timestamp'
+        muscleGroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/MuscleGroup'
+    WorkoutLogDescription:
+      allOf:
+        - $ref: '#/components/schemas/WorkoutLogRef'
+        - $ref: '#/components/schemas/WorkoutLogHeader'
+    GetWorkoutLogsResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/WorkoutLogDescription'
+    ExerciseLogRef:
+      type: object
+      additionalProperties: true
+      required:
+        - id
+      properties:
+        id:
+          type: string
+    ExerciseLogBody:
+      type: object
+      additionalProperties: true
+      required:
+        - exercise
+        - reps
+        - weight
+        - startedAt
+        - endedAt
+      properties:
+        exercise:
+          $ref: '#/components/schemas/Exercise'
+        reps:
+          type: integer
+          format: int32
+        weight:
+          type: number
+          format: double
+        startedAt:
+          $ref: '#/components/schemas/Timestamp'
+        endedAt:
+          $ref: '#/components/schemas/Timestamp'
+    ExerciseLog:
+      allOf:
+        - $ref: '#/components/schemas/ExerciseLogRef'
+        - $ref: '#/components/schemas/ExerciseLogBody'
+    WorkoutLogBody:
+      type: object
+      additionalProperties: true
+      required:
+        - exercises
+      properties:
+        exercises:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseLog'
+    PostWorkoutLogRequest:
+      allOf:
+        - $ref: '#/components/schemas/WorkoutLogHeader'
+        - $ref: '#/components/schemas/WorkoutLogBody'
+    WorkoutLog:
+      allOf:
+        - $ref: '#/components/schemas/WorkoutLogRef'
+        - $ref: '#/components/schemas/WorkoutLogHeader'
+        - $ref: '#/components/schemas/WorkoutLogBody'

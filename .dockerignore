@@ -7,3 +7,5 @@
 **/compile_commands.json
 **/build_debug
 **/build_release
+
+!/training_service/build_release/training_service

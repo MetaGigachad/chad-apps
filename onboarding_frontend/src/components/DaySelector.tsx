@@ -24,7 +24,7 @@ export const DaySelector: Component<{
     });
   }
   return (
-    <div class="relative" use:clickOutside={() => setShowDropdown(false)}>
+    <div class="flex md:relative" use:clickOutside={() => setShowDropdown(false)}>
       <button
         class="flex items-center rounded-lg p-1 hover:bg-zinc-600"
         onClick={() => setShowDropdown((x) => !x)}
@@ -33,7 +33,7 @@ export const DaySelector: Component<{
         <h4 class="ml-px font-sans text-sm font-semibold">{value()}</h4>
       </button>
       <Show when={showDropdown()}>
-        <div class="absolute left-1/2 top-full m-auto flex -translate-x-1/2 translate-y-1 items-center gap-2 rounded-lg bg-zinc-900 p-1 pl-2">
+        <div class="md:absolute md:left-1/2 md:top-full m-auto flex flex-row md:-translate-x-1/2 md:translate-y-1 items-center gap-2 rounded-lg dark:bg-zinc-600 md:dark:bg-zinc-900 p-1 pl-2">
           <input
             class="h-5 w-8 border-b border-zinc-600 bg-inherit focus:outline-none dark:text-zinc-200"
             type="number"

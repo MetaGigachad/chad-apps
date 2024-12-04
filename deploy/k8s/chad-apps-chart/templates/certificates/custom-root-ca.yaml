@@ -1,3 +1,4 @@
+{{- if $.Values.certificates.selfIssued }}
 # yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/cert-manager.io/clusterissuer_v1.json
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -31,3 +32,4 @@ metadata:
 spec:
   ca:
     secretName: custom-root-ca-cert
+{{- end }}

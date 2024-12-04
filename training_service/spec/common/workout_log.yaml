@@ -1,0 +1,51 @@
+components:
+  schemas:
+    WorkoutLog:
+      allOf:
+        - $ref: '#/components/schemas/WorkoutLogRef'
+        - $ref: '#/components/schemas/WorkoutLogHeader'
+        - $ref: '#/components/schemas/WorkoutLogBody'
+    WorkoutLogDescription:
+      allOf:
+        - $ref: '#/components/schemas/WorkoutLogRef'
+        - $ref: '#/components/schemas/WorkoutLogHeader'
+    WorkoutLogRef:
+      type: object
+      additionalProperties: true
+      required:
+        - id
+      properties:
+        id:
+          type: string
+    WorkoutLogHeader:
+      type: object
+      additionalProperties: true
+      required:
+        - name
+        - baseWorkoutRef
+        - startedAt
+        - endedAt
+        - muscleGroups
+      properties:
+        name:
+          type: string
+        baseWorkoutRef:
+          $ref: './workout.yaml#/components/schemas/WorkoutRef'
+        startedAt:
+          $ref: './timestamp.yaml#/components/schemas/Timestamp'
+        endedAt:
+          $ref: './timestamp.yaml#/components/schemas/Timestamp'
+        muscleGroups:
+          type: array
+          items:
+            $ref: './muscle_group.yaml#/components/schemas/MuscleGroup'
+    WorkoutLogBody:
+      type: object
+      additionalProperties: true
+      required:
+        - exercises
+      properties:
+        exercises:
+          type: array
+          items:
+            $ref: './exercise_log.yaml#/components/schemas/ExerciseLog'

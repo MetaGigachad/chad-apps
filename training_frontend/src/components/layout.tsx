@@ -1,11 +1,21 @@
-import { ParentProps, Show, mergeProps, useContext } from "solid-js";
+import {
+  Match,
+  ParentProps,
+  Show,
+  Switch,
+  mergeProps,
+  useContext,
+} from "solid-js";
 import { Icon } from "./utils";
-import { ThemeContext, useLoggedInUser, useLoggedOutUser, UserContext } from "@metachad/frontend-common";
+import {
+  ThemeContext,
+  useLoggedInUser,
+  useLoggedOutUser,
+  UserContext,
+} from "@metachad/frontend-common";
 
 export function Layout(props: ParentProps) {
-  return (
-    <Body>{props.children}</Body>
-  );
+  return <Body>{props.children}</Body>;
 }
 
 export function Root(props: ParentProps) {
@@ -24,9 +34,11 @@ export function Root(props: ParentProps) {
 function Body(props: ParentProps) {
   return (
     <div class="flex w-screen flex-col items-stretch">
-      <div class="flex flex-col items-stretch h-screen">
+      <div class="flex h-screen flex-col items-stretch">
         <Header />
-        <div class="flex md:items-start flex-col-reverse items-stretch md:flex-row flex-grow min-h-0">{props.children}</div>
+        <div class="flex min-h-0 flex-grow flex-col-reverse items-stretch md:flex-row md:items-start">
+          {props.children}
+        </div>
       </div>
     </div>
   );
@@ -44,9 +56,17 @@ function Header() {
 function LoginInfo() {
   const [user] = useContext(UserContext)!;
   return (
-    <Show when={user.state !== "loggedOut"} fallback={<LoginButton />}>
-      <LogoutButton />
-    </Show>
+    <Switch>
+      <Match when={user.state === "loggedOut"}>
+        <LoginButton />
+      </Match>
+      <Match when={user.state === "loggingIn"}>
+        <div class="loader"></div>
+      </Match>
+      <Match when={user.state === "loggedIn"}>
+        <LogoutButton />
+      </Match>
+    </Switch>
   );
 }
 

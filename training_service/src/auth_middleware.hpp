@@ -5,6 +5,7 @@
 namespace training_service {
 
 struct UserData {
+    std::string Id;
     std::string OAuth2UserId;
     std::string UserName;
 };

@@ -1,0 +1,6 @@
+components:
+  schemas:
+    GetExercisesResponse:
+      type: array
+      items:
+        $ref: '../../common/exercise.yaml#/components/schemas/Exercise'

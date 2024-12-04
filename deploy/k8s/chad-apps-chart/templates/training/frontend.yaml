@@ -1,10 +1,24 @@
+{{- $name := "training-frontend" }}
+{{- with $.Values.training.frontend }}
+{{- if .bypass.enable }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: training-frontend
+  name: {{ $name }}
+spec:
+  type: ExternalName
+  externalName: {{ .bypass.externalName }}
+  ports:
+   - port: 80
+     targetPort: {{ .bypass.localPort }}
+{{- else }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
 spec:
   selector:
-    app: training-frontend
+    app: {{ $name }}
   ports:
   - protocol: TCP
     port: 80
@@ -14,18 +28,20 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: training-frontend
+  name: {{ $name }}
 spec:
   selector:
     matchLabels:
-      app: training-frontend
+      app: {{ $name }}
   template:
     metadata:
       labels:
-        app: training-frontend
+        app: {{ $name }}
     spec:
       containers:
-      - name: training-frontend
-        image: {{ $.Values.training.frontend.image }}
+      - name: {{ $name }}
+        image: {{ .image }}
         ports:
         - containerPort: 80
+{{- end }}
+{{- end }}

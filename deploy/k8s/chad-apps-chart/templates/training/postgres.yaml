@@ -88,4 +88,96 @@ spec:
   resources:
     requests:
       storage: 5Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: training-service-migration-files
+data:
+  1_initial.up.sql: |
+    CREATE TYPE MUSCLE_GROUP AS ENUM (
+      'chest',
+      'back',
+      'abs',
+      'shoulders',
+      'biceps',
+      'triceps',
+      'forearms',
+      'quadriceps',
+      'hamstrings',
+      'calves'
+    );
 
+    CREATE SCHEMA service;
+
+    CREATE TABLE service.users (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      oauth2_id VARCHAR(255) NOT NULL UNIQUE,
+      name VARCHAR(255) NOT NULL
+    );
+
+    CREATE TABLE service.exercises (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      name VARCHAR(255) NOT NULL,
+      body_weight BOOLEAN NOT NULL,
+      muscle_groups MUSCLE_GROUP[] NOT NULL,
+      owner_id UUID NOT NULL, 
+      deleted BOOLEAN NOT NULL DEFAULT FALSE,
+      FOREIGN KEY (owner_id) REFERENCES service.users(id)
+    );
+
+    CREATE TABLE service.workouts (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      name VARCHAR(255) NOT NULL,
+      edited_at BIGINT NOT NULL,
+      muscle_groups MUSCLE_GROUP[] NOT NULL,
+      owner_id UUID NOT NULL,
+      FOREIGN KEY (owner_id) REFERENCES service.users(id)
+    );
+    CREATE TABLE service.workout_exercises (
+      workout_id UUID NOT NULL,
+      exercise_id UUID NOT NULL,
+      order_id INT NOT NULL,
+      rep_range INT[] NOT NULL, -- Array of two numbers for the rep range
+      sets INT NOT NULL,
+      PRIMARY KEY (workout_id, order_id),
+      FOREIGN KEY (workout_id) REFERENCES service.workouts(id) ON DELETE CASCADE,
+      FOREIGN KEY (exercise_id) REFERENCES service.exercises(id)
+    );
+
+    CREATE TABLE service.workout_logs (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      started_at BIGINT NOT NULL,
+      ended_at BIGINT NOT NULL,
+      muscle_groups MUSCLE_GROUP[] NOT NULL,
+      base_workout_id UUID NOT NULL,
+      owner_id UUID NOT NULL,
+      FOREIGN KEY (owner_id) REFERENCES service.users(id),
+      FOREIGN KEY (base_workout_id) REFERENCES service.workouts(id)
+    );
+    CREATE TABLE service.workout_log_exercises (
+      log_id UUID NOT NULL,
+      exercise_id UUID NOT NULL,
+      order_id INT NOT NULL,
+      reps INT NOT NULL,
+      weight DOUBLE PRECISION NOT NULL,
+      started_at BIGINT NOT NULL,
+      ended_at BIGINT NOT NULL,
+      PRIMARY KEY (log_id, order_id),
+      FOREIGN KEY (log_id) REFERENCES service.workout_logs(id) ON DELETE CASCADE,
+      FOREIGN KEY (exercise_id) REFERENCES service.exercises(id)
+    );
+  1_initial.down.sql: |
+    DROP TABLE service.workout_log_exercises;
+    DROP TABLE service.workout_logs;
+
+    DROP TABLE service.workout_exercises;
+    DROP TABLE service.workouts;
+
+    DROP TABLE service.exercises;
+
+    DROP TABLE service.users;
+
+    DROP SCHEMA service CASCADE;
+
+    DROP TYPE MUSCLE_GROUP;

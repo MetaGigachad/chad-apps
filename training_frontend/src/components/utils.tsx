@@ -38,7 +38,6 @@ export function CheckBox(props: { disabled?: boolean, class?: string, disabledCl
   const name = () => checked() ? "check_box" : "check_box_outline_blank";
 
   createEffect(() => {
-    console.log(name());
     props.onChange(checked());
   });
 

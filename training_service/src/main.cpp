@@ -8,8 +8,10 @@
 #include <userver/clients/dns/component.hpp>
 
 #include "auth_middleware.hpp"
-#include "workouts_handler.hpp"
-#include "config_handler.hpp"
+#include "workouts.hpp"
+#include "workout_logs.hpp"
+#include "exercises.hpp"
+#include "config.hpp"
 
 int main(int argc, char* argv[]) {
   auto component_list = userver::components::MinimalServerComponentList()
@@ -23,6 +25,8 @@ int main(int argc, char* argv[]) {
   training_service::AppendAuthMiddleware(component_list);
   training_service::AppendConfig(component_list);
   training_service::AppendWorkouts(component_list);
+  training_service::AppendWorkoutLogs(component_list);
+  training_service::AppendExercises(component_list);
 
   return userver::utils::DaemonMain(argc, argv, component_list);
 }

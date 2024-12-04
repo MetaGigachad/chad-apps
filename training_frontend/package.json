@@ -6,11 +6,12 @@
     "start": "vite",
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "codegen": "openapi-generator generate -g typescript-fetch -i ../training_service/schemas/api.yaml -o src/api --skip-validate-spec"
   },
   "license": "MIT",
   "devDependencies": {
-    "vite-plugin-checker": "^0.8.0",
+    "@types/jest": "^29.5.14",
     "autoprefixer": "^10.4.19",
     "msw": "^2.4.9",
     "postcss": "^8.4.38",
@@ -20,13 +21,16 @@
     "tailwindcss": "^3.4.3",
     "typescript": "^5.3.3",
     "vite": "^5.0.11",
+    "vite-plugin-checker": "^0.8.0",
     "vite-plugin-node-polyfills": "^0.21.0",
     "vite-plugin-solid": "^2.8.2"
   },
   "dependencies": {
     "@metachad/frontend-common": "workspace:^",
+    "@solid-primitives/storage": "^4.2.1",
     "@solidjs/router": "^0.13.2",
     "base64url": "^3.0.1",
+    "isomorphic-fetch": "^3.0.0",
     "openid-client": "^5.6.5",
     "solid-js": "^1.8.11"
   },

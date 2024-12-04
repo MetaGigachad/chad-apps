@@ -1,6 +1,6 @@
 import { For, createEffect, createSignal } from "solid-js";
-import { MuscleGroup } from "../fetch";
 import { Hoverable } from "./utils";
+import { MuscleGroup } from "../api";
 
 export function MuscleGroupsCell(props: { groups: MuscleGroup[]; class?: string }) {
   return (
@@ -61,18 +61,16 @@ function muscleGroupToCode(group: MuscleGroup) {
       return "CH";
     case "back":
       return "BA";
-    case "front_delt":
-      return "FD";
-    case "mid_delt":
-      return "MD";
-    case "back_delt":
-      return "BD";
+    case "shoulders":
+      return "SH"
+    case "abs":
+      return "AB"
     case "biceps":
       return "BI";
     case "triceps":
       return "TR";
     case "forearms":
-      return "FA";
+      return "FO";
     case "quadriceps":
       return "QU";
     case "hamstrings":
@@ -88,12 +86,10 @@ function muscleGroupToTitle(group: MuscleGroup) {
       return "Chest";
     case "back":
       return "Back";
-    case "front_delt":
-      return "Front deltoids";
-    case "mid_delt":
-      return "Mid deltoids";
-    case "back_delt":
-      return "Back deltoids";
+    case "abs":
+      return "Abdominals";
+    case "shoulders":
+      return "Shoulders";
     case "biceps":
       return "Biceps";
     case "triceps":
@@ -112,9 +108,8 @@ function muscleGroupToTitle(group: MuscleGroup) {
 const allMuscleGroups = [
   "chest",
   "back",
-  "front_delt",
-  "mid_delt",
-  "back_delt",
+  "abs",
+  "shoulders",
   "biceps",
   "triceps",
   "forearms",

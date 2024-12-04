@@ -1,0 +1,7 @@
+components:
+  schemas:
+    PostExerciseRequest:
+      $ref: '../../common/exercise.yaml#/components/schemas/ExerciseBody'
+    PostExerciseResponse:
+      $ref: '../../common/exercise.yaml#/components/schemas/ExerciseRef'
+

@@ -7,6 +7,7 @@ export function Button(
     icon?: string;
     text: string;
     class?: string;
+    disableAdapt?: boolean;
   },
 ) {
   const viewport = useContext(ViewportContext)!;
@@ -19,7 +20,7 @@ export function Button(
       <Show when={props.icon != null}>
         <Icon name={props.icon!} class="text-2xl md:mr-0 md:text-lg" />
       </Show>
-      <Show when={!viewport.mobile || props.icon == null}>{props.text}</Show>
+      <Show when={!viewport.mobile || props.icon == null || props.disableAdapt}>{props.text}</Show>
       {props.children}
     </button>
   );

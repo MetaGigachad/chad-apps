@@ -1,0 +1,30 @@
+components:
+  schemas:
+    Exercise:
+      allOf:
+        - $ref: '#/components/schemas/ExerciseRef'
+        - $ref: '#/components/schemas/ExerciseBody'
+    ExerciseRef:
+      type: object
+      additionalProperties: true
+      required:
+        - id
+      properties:
+        id:
+          type: string
+    ExerciseBody:
+      type: object
+      additionalProperties: true
+      required:
+        - name
+        - bodyWeight
+        - muscleGroups
+      properties:
+        name:
+          type: string
+        bodyWeight:
+          type: boolean
+        muscleGroups:
+          type: array
+          items:
+            $ref: './muscle_group.yaml#/components/schemas/MuscleGroup'

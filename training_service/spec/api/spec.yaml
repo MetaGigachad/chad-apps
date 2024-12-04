@@ -1,0 +1,197 @@
+openapi: 3.1.1
+info:
+  title: Training service
+  description: Backend for training app
+  version: 1.0.0
+servers:
+  - url: https://training.metachad.duckdns.org/api
+paths:
+  /config:
+    get:
+      operationId: getConfig
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: './config/get.yaml#/components/schemas/GetConfigResponse'
+  /workouts:
+    get:
+      operationId: getWorkouts
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: './workouts/get.yaml/#/components/schemas/GetWorkoutsResponse'
+  /workout:
+    post:
+      operationId: postWorkout
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './workout/post.yaml#/components/schemas/PostWorkoutRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: './workout/post.yaml#/components/schemas/PostWorkoutResponse'
+  /workout/{id}:
+    get:
+      operationId: getWorkout
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: './workout/get.yaml#/components/schemas/GetWorkoutResponse'
+    put:
+      operationId: putWorkout
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './workout/put.yaml#/components/schemas/PutWorkoutRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: './workout/put.yaml#/components/schemas/PutWorkoutResponse'
+    delete:
+      operationId: deleteWorkout
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+  /exercises:
+    get:
+      operationId: getExercises
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: './exercises/get.yaml/#/components/schemas/GetExercisesResponse'
+  /exercise:
+    post:
+      operationId: postExercise
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './exercise/post.yaml#/components/schemas/PostExerciseRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: './exercise/post.yaml/#/components/schemas/PostExerciseResponse'
+  /exercise/{id}:
+    delete:
+      operationId: deleteExercise
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+  /workoutLogs:
+    get:
+      operationId: getWorkoutLogs
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: './workoutLogs/get.yaml/#/components/schemas/GetWorkoutLogsResponse'
+  /workoutLog:
+    post:
+      operationId: postWorkoutLog
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './workoutLog/post.yaml#/components/schemas/PostWorkoutLogRequest'
+      responses:
+        '200': {}
+
+  /workoutLog/{id}:
+    get:
+      operationId: getWorkoutLog
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: './workoutLog/get.yaml#/components/schemas/GetWorkoutLogResponse'
+    delete:
+      operationId: deleteWorkoutLog
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: OAuth2

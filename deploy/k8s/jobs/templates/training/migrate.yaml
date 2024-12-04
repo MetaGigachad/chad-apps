@@ -1,0 +1,21 @@
+{{- $op := $.Values.training.jobs.migrateOp }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: training-postgres-migration
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: migrations
+        image: migrate/migrate:v4.18.1
+        command: ["/bin/sh", "-c", "yes | migrate -path /migrations -database 'postgresql://service:{{ $.Values.training.postgres.passwords.service }}@training-postgres:5432/service?sslmode=disable&search_path=public' {{ $op }}"]
+        volumeMounts:
+        - name: migration-files
+          mountPath: /migrations
+      volumes:
+      - name: migration-files
+        configMap:
+          name: training-service-migration-files
+

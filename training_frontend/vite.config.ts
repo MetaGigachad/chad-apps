@@ -5,6 +5,9 @@ import checker from 'vite-plugin-checker';
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig({
+  define: {
+    'import.meta.env.DEV': false,
+  },
   plugins: [
     /* 
     Uncomment the following line to enable solid-devtools.

@@ -8,8 +8,9 @@
     "esModuleInterop": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": ["vite/client"],
+    "types": ["vite/client", "jest"],
     "noEmit": true,
     "isolatedModules": true,
   },
+  "exclude": ["src/api/*.ts", "src/api/api.ts"],
 }

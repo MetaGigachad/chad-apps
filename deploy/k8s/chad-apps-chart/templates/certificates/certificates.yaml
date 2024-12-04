@@ -1,3 +1,8 @@
+{{- $ca := "letsencrypt-ca-issuer" }}
+{{- if $.Values.certificates.selfIssued }}
+{{- $ca := "custom-root-ca-issuer" }}
+{{- end }}
+
 {{- range $item := list
   (dict "subdomain" "grafana" "namespace" "prometheus")
   (dict "subdomain" "auth" "namespace" "default")
@@ -17,6 +22,6 @@ spec:
     - {{ $item.subdomain }}.metachad.duckdns.org
   secretName: {{ $item.subdomain }}-cert
   issuerRef:
-    name: custom-root-ca-issuer
+    name: {{ $ca }}
     kind: ClusterIssuer
 {{- end }}

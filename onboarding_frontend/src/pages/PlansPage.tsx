@@ -1,8 +1,14 @@
-import { useNavigate } from "@solidjs/router";
 import { Header } from "../components/Header";
 import { Button, NavBar } from "../components/NavBar";
 import { EditorContext } from "../state/EditorContext";
-import { apiFetch, capitalizeObject, sleep, useLoggedInUser } from "@metachad/frontend-common";
+import { ViewportContext } from "../state/ViewportContext";
+import {
+  apiFetch,
+  capitalizeObject,
+  sleep,
+  useLoggedInUser,
+} from "@metachad/frontend-common";
+import { useNavigate } from "@solidjs/router";
 import {
   For,
   JSX,
@@ -17,9 +23,9 @@ import { Portal } from "solid-js/web";
 
 export function PlansPage() {
   return (
-    <div class="mt-2 flex gap-4 text-zinc-200">
+    <div class="mt-2 flex gap-4 text-zinc-200 flex-col md:flex-row">
       <NavBar selected={Button.PLANS} />
-      <div class="mb-6 mr-6 flex max-w-full flex-wrap gap-4 rounded-2xl bg-zinc-800 p-4">
+      <div class="md:mb-6 md:mr-6 justify-center flex max-w-full flex-wrap gap-4 md:rounded-2xl bg-zinc-800 p-4">
         <PlansList />
       </div>
     </div>
@@ -84,6 +90,7 @@ export function PlansList() {
 
 export function Plan(props: { plan: Plan; updatePlans: () => Promise<void> }) {
   const navigate = useNavigate();
+  const viewport = useContext(ViewportContext)!;
 
   const [showControls, setShowControls] = createSignal(false);
   const [showDeployOverlay, setShowDeployOverlay] = createSignal(false);
@@ -114,6 +121,10 @@ export function Plan(props: { plan: Plan; updatePlans: () => Promise<void> }) {
         onMouseEnter={(_) => setShowControls(true)}
         onMouseLeave={(_) => setShowControls(false)}
         onClick={async () => {
+          if (viewport.mobile) {
+            setShowControls((x) => !x);
+            return;
+          }
           await editor.loadPlan(props.plan.textId, props.plan.name);
           navigate("/editPlan");
         }}
@@ -123,6 +134,17 @@ export function Plan(props: { plan: Plan; updatePlans: () => Promise<void> }) {
           style={{ visibility: showControls() ? "visible" : "hidden" }}
           class="flex gap-2"
         >
+          <Show when={viewport.mobile}>
+            <button
+              class="dark:text-zinc-400 hover:dark:text-zinc-300"
+              onClick={async (e) => {
+                await editor.loadPlan(props.plan.textId, props.plan.name);
+                navigate("/editPlan");
+              }}
+            >
+              <span class="material-symbols-outlined text-md">edit</span>
+            </button>
+          </Show>
           <button
             class="dark:text-zinc-400 hover:dark:text-zinc-300"
             onClick={(e) => {
@@ -146,7 +168,7 @@ export function Plan(props: { plan: Plan; updatePlans: () => Promise<void> }) {
       <Show when={showDeployOverlay()}>
         <DeployOverlay
           hideOverlay={() => setShowDeployOverlay(false)}
-          onDeploy={async () => { }}
+          onDeploy={async () => {}}
           plan={props.plan}
         />
       </Show>

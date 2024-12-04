@@ -1,0 +1,6 @@
+components:
+  schemas:
+    PostWorkoutLogRequest:
+      allOf:
+        - $ref: '../../common/workout_log.yaml#/components/schemas/WorkoutLogHeader'
+        - $ref: '../../common/workout_log.yaml#/components/schemas/WorkoutLogBody'

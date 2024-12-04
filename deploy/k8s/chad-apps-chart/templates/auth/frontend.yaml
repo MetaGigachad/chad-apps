@@ -1,10 +1,24 @@
+{{- $name := "auth-frontend" }}
+{{- with $.Values.auth.frontend }}
+{{- if .bypass.enable }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: auth-frontend
+  name: {{ $name }}
+spec:
+  type: ExternalName
+  externalName: {{ .bypass.externalName }}
+  ports:
+   - port: 80
+     targetPort: {{ .bypass.localPort }}
+{{- else }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
 spec:
   selector:
-    app: auth-frontend
+    app: {{ $name }}
   ports:
   - protocol: TCP
     port: 80
@@ -14,18 +28,20 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-frontend
+  name: {{ $name }}
 spec:
   selector:
     matchLabels:
-      app: auth-frontend
+      app: {{ $name }}
   template:
     metadata:
       labels:
-        app: auth-frontend
+        app: {{ $name }}
     spec:
       containers:
-      - name: auth-frontend
-        image: {{ $.Values.auth.frontend.image }}
+      - name: {{ $name }}
+        image: {{ .image }}
         ports:
         - containerPort: 80
+{{- end }}
+{{- end }}

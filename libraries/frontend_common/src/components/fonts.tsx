@@ -8,7 +8,6 @@ export function FontLoader(props: ParentProps) {
       document.fonts.load('16px "Squada One"'),
       document.fonts.load('16px "Material Symbols Outlined"')
     ]).then(() => {
-      console.log('Both fonts have successfully loaded.');
       setLoadingFonts(false);
     }).catch(() => {
       console.log('One or both fonts failed to load.');

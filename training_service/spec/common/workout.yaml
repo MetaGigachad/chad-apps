@@ -1,0 +1,45 @@
+components:
+  schemas:
+    Workout:
+      allOf:
+        - $ref: '#/components/schemas/WorkoutRef'
+        - $ref: '#/components/schemas/WorkoutHeader'
+        - $ref: '#/components/schemas/WorkoutBody'
+    WorkoutDescription:
+      allOf:
+        - $ref: '#/components/schemas/WorkoutRef'
+        - $ref: '#/components/schemas/WorkoutHeader'
+    WorkoutRef:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          type: string
+    WorkoutHeader:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - editedAt
+        - muscleGroups
+      properties:
+        name:
+          type: string
+        editedAt:
+          $ref: './timestamp.yaml#/components/schemas/Timestamp'
+        muscleGroups:
+          type: array
+          items:
+            $ref: './muscle_group.yaml#/components/schemas/MuscleGroup'
+    WorkoutBody:
+      type: object
+      additionalProperties: false
+      required:
+        - exercises
+      properties:
+        exercises:
+          type: array
+          items:
+            $ref: './workout_exercise.yaml#/components/schemas/WorkoutExercise'

@@ -56,7 +56,7 @@ export const RegisterPage: Component = () => {
         ]}
         onSubmit={submitHandler}
       >
-        <div class="flex justify-center">
+        <div class="flex mt-auto justify-center">
           <PrimaryButton type="submit">Register</PrimaryButton>
           {/* <SecondaryButton onClick={(_) => window.location.pathname = "/login"} type="button">Login</SecondaryButton> */}
         </div>

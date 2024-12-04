@@ -1,18 +1,10 @@
 import { Match, ParentProps, Switch, createContext, createResource } from "solid-js";
+import { Configuration, DefaultApi, GetConfigResponse } from "../api";
 
-export interface ConfigType {
-  oAuth2: {
-    authUrl: string
-    tokenUrl: string
-    clientId: string
-    redirectUri: string
-  }
-}
-
-export const ConfigContext = createContext<ConfigType>();
+export const ConfigContext = createContext<GetConfigResponse>();
 
 export function ConfigProvider(props: ParentProps) {
-  const [config] = createResource<ConfigType>(fetchConfig);
+  const [config] = createResource<GetConfigResponse>(async () => await new DefaultApi(new Configuration()).getConfig());
 
   return (
       <Switch>
@@ -29,9 +21,4 @@ export function ConfigProvider(props: ParentProps) {
         </Match>
       </Switch>
   );
-}
-
-export async function fetchConfig(): Promise<ConfigType> {
-  const res = await fetch("/api/config").then((r) => r.json());
-  return res;
 }

@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+.squada-one-regular {
+  font-family: "Squada One", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
 .bg-chad {
   background-image: url('https://qph.cf2.quoracdn.net/main-qimg-d10365c0d88404820cb52a5a91628b0d');
 }

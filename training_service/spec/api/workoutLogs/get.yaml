@@ -1,0 +1,6 @@
+components:
+  schemas:
+    GetWorkoutLogsResponse:
+      type: array
+      items:
+        $ref: '../../common/workout_log.yaml#/components/schemas/WorkoutLogDescription'

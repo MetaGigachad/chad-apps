@@ -26,7 +26,6 @@ userver_setup_environment()
 file(GLOB_RECURSE SCHEMAS ${CMAKE_CURRENT_SOURCE_DIR}/schemas/*.yaml)
 userver_target_generate_chaotic(${PROJECT_NAME}_chgen
     ARGS
-        # Map '/components/schemas/*' JSONSchema types to C++ types in 'samples::hello' namespace
         -n "/components/schemas/([^/]*)/=training_service::schemas::{0}"
         -f "(.*)={0}"
         # Don't call clang-format
@@ -45,32 +44,38 @@ userver_target_generate_chaotic(${PROJECT_NAME}_chgen
 add_library(${PROJECT_NAME}_objs OBJECT
     src/auth_middleware.hpp
     src/auth_middleware.cpp
-    src/workouts_handler.hpp
-    src/workouts_handler.cpp
-    src/config_handler.hpp
-    src/config_handler.cpp
+    src/config.hpp
+    src/config.cpp
+    src/workouts.hpp
+    src/workouts.cpp
+    src/workout_logs.hpp
+    src/workout_logs.cpp
+    src/exercises.hpp
+    src/exercises.cpp
 )
+target_compile_features(${PROJECT_NAME}_objs PUBLIC cxx_std_20)
 target_link_libraries(${PROJECT_NAME}_objs PUBLIC userver::postgresql ${PROJECT_NAME}_chgen)
 
 # The Service
 add_executable(${PROJECT_NAME} src/main.cpp)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_objs)
 
 
 # Unit Tests
-add_executable(${PROJECT_NAME}_unittest
-    src/hello_test.cpp
-)
-target_link_libraries(${PROJECT_NAME}_unittest PRIVATE ${PROJECT_NAME}_objs userver::utest)
-add_google_tests(${PROJECT_NAME}_unittest)
+# add_executable(${PROJECT_NAME}_unittest
+#     src/hello_test.cpp
+# )
+# target_link_libraries(${PROJECT_NAME}_unittest PRIVATE ${PROJECT_NAME}_objs userver::utest)
+# add_google_tests(${PROJECT_NAME}_unittest)
 
 
 # Benchmarks
-add_executable(${PROJECT_NAME}_benchmark
-    src/hello_benchmark.cpp
-)
-target_link_libraries(${PROJECT_NAME}_benchmark PRIVATE ${PROJECT_NAME}_objs userver::ubench)
-add_google_benchmark_tests(${PROJECT_NAME}_benchmark)
+# add_executable(${PROJECT_NAME}_benchmark
+#     src/hello_benchmark.cpp
+# )
+# target_link_libraries(${PROJECT_NAME}_benchmark PRIVATE ${PROJECT_NAME}_objs userver::ubench)
+# add_google_benchmark_tests(${PROJECT_NAME}_benchmark)
 
 
 # Functional Tests

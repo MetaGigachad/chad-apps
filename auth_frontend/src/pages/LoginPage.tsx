@@ -116,10 +116,7 @@ export const LoginPage: Component = () => {
         ]}
         onSubmit={submitHandler}
       >
-        <div class="flex justify-between">
-          <PrimaryButton type="submit" disabled={loading()}>
-            Login
-          </PrimaryButton>
+        <div class="flex mt-auto gap-4 justify-between">
           <SecondaryButton
             onClick={() => {
               !loading() && navigate("/register");
@@ -128,6 +125,9 @@ export const LoginPage: Component = () => {
           >
             Register
           </SecondaryButton>
+          <PrimaryButton type="submit" disabled={loading()}>
+            Login
+          </PrimaryButton>
         </div>
       </LineForm>
     </PageBase>

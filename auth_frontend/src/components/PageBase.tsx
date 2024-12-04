@@ -18,7 +18,7 @@ export const PageBase: Component<PageBaseProps> = (props) => {
   }
 
   return (
-    <div class="w-96 rounded-lg bg-zinc-100 bg-opacity-80 p-8 text-zinc-600 decoration-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:decoration-zinc-200">
+    <div class="w-96 h-screen flex flex-col md:h-auto flex-grow md:flex-grow-0 md:rounded-lg bg-zinc-100 bg-opacity-80 p-8 text-zinc-600 decoration-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:decoration-zinc-200">
       <div class="mb-6">
         <div class="flex items-center justify-center">
           <h2 class="text-center text-2xl font-semibold">{props.title}</h2>

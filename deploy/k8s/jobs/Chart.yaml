@@ -1,0 +1,5 @@
+apiVersion: v2
+name: chad-apps-jobs-chart
+description: A Helm chart for jobs
+version: 0.1.0
+type: application

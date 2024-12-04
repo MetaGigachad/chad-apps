@@ -1,7 +1,7 @@
 CMAKE_COMMON_FLAGS ?= -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 CMAKE_DEBUG_FLAGS ?= -DUSERVER_SANITIZE='addr ub'
 CMAKE_RELEASE_FLAGS ?=
-NPROCS ?= $(shell nproc)
+NPROCS ?= $(shell echo $$(( $(shell nproc) - 4 > 1 ? $(shell nproc) - 4 : 1 )))
 CLANG_FORMAT ?= clang-format
 DOCKER_COMPOSE ?= docker-compose
 
@@ -117,3 +117,7 @@ attach-to-dev-container:
 .PHONY: stop-dev-container
 stop-dev-container:
 	docker stop training-service-dev-container
+
+.PHONY: bundle-spec
+bundle-spec:
+	npx @redocly/cli bundle spec/api/spec.yaml -o schemas/api.yaml

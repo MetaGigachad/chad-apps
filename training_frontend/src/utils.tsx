@@ -48,9 +48,10 @@ export function localStore<T extends object>(
   return [store, setStore] as const;
 }
 
-export function prettyDate(date: Date) {
+export function prettyDate(dateNumber: number) {
+  const date = new Date(dateNumber)
   const now = new Date();
-  const diff = (now.getTime() - date.getTime()) / 1000;
+  const diff = (now.getTime() - dateNumber) / 1000;
   const dayDiff = Math.floor(diff / 86400);
 
   if (isNaN(dayDiff) || dayDiff < 0) {

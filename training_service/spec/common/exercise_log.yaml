@@ -1,0 +1,38 @@
+components:
+  schemas:
+    ExerciseLog:
+      allOf:
+        - $ref: '#/components/schemas/ExerciseLogRef'
+        - $ref: '#/components/schemas/ExerciseLogBody'
+    ExerciseLogRef:
+      type: object
+      additionalProperties: true
+      required:
+        - id
+      properties:
+        id:
+          type: string
+    ExerciseLogBody:
+      type: object
+      additionalProperties: true
+      required:
+        - exercise
+        - reps
+        - weight
+        - startedAt
+        - endedAt
+      properties:
+        exercise:
+          $ref: './exercise.yaml#/components/schemas/Exercise'
+        reps:
+          type: integer
+          format: int32
+        weight:
+          type: number
+          format: double
+        startedAt:
+          $ref: './timestamp.yaml#/components/schemas/Timestamp'
+        endedAt:
+          $ref: './timestamp.yaml#/components/schemas/Timestamp'
+
+    
