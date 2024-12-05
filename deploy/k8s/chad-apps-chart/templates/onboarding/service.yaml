@@ -62,8 +62,8 @@ stringData:
       url: http://hydra-admin
     frontend_config:
       oauth2:
-        auth_url: https://auth.metachad.duckdns.org/oauth2/auth
-        token_url: https://auth.metachad.duckdns.org/oauth2/token
+        auth_url: https://auth.metachad.{{ $.Values.dns.rootDomain }}/oauth2/auth
+        token_url: https://auth.metachad.{{ $.Values.dns.rootDomain }}/oauth2/token
         client_id: {{ $.Values.onboarding.oauth2Client.id }}
         redirect_uri: {{ index $.Values.onboarding.oauth2Client.redirectUris 0 }}
 ---

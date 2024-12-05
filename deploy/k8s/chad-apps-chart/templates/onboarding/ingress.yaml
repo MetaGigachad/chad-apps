@@ -6,7 +6,7 @@ metadata:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
   rules:
-    - host: onboarding.metachad.duckdns.org
+    - host: onboarding.metachad.{{ $.Values.dns.rootDomain }}
       http:
         paths:
           - path: /
@@ -25,5 +25,5 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - onboarding.metachad.duckdns.org
+        - onboarding.metachad.{{ $.Values.dns.rootDomain }}
       secretName: onboarding-cert

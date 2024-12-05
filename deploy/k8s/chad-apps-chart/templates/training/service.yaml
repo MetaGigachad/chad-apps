@@ -91,8 +91,8 @@ stringData:
           task_processor: main-task-processor
           frontendConfig:
             oAuth2:
-              authUrl: https://auth.metachad.duckdns.org/oauth2/auth
-              tokenUrl: https://auth.metachad.duckdns.org/oauth2/token
+              authUrl: https://auth.metachad.{{ $.Values.dns.rootDomain }}/oauth2/auth
+              tokenUrl: https://auth.metachad.{{ $.Values.dns.rootDomain }}/oauth2/token
               clientId: {{ $.Values.training.oauth2Client.id }}
               redirectUri: {{ index $.Values.training.oauth2Client.redirectUris 0 }}
             

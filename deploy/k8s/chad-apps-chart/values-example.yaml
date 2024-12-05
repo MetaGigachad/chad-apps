@@ -1,3 +1,6 @@
+dns:
+  rootDomain: mooo.com
+
 certificates:
   selfIssued: true
   email: johndoe@example.com
@@ -31,7 +34,7 @@ onboarding:
     id: onboarding
     name: Chad's Onboarding App Client
     redirectUris:
-      - https://onboarding.metachad.duckdns.org/plans
+      - https://onboarding.metachad.mooo.com/plans
 
 training:
   frontend:
@@ -50,4 +53,4 @@ training:
     id: training
     name: Chad's Training App Client
     redirectUris:
-      - https://training.metachad.duckdns.org/workouts
+      - https://training.metachad.mooo.com/workouts

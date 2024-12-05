@@ -5,10 +5,10 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://onboarding.metachad.duckdns.org, https://training.metachad.duckdns.org"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://onboarding.metachad.{{ $.Values.dns.rootDomain }}, https://training.metachad.{{ $.Values.dns.rootDomain }}"
 spec:
   rules:
-    - host: auth.metachad.duckdns.org
+    - host: auth.metachad.{{ $.Values.dns.rootDomain }}
       http:
         paths:
           - path: /
@@ -34,5 +34,5 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - auth.metachad.duckdns.org
+        - auth.metachad.{{ $.Values.dns.rootDomain }}
       secretName: auth-cert

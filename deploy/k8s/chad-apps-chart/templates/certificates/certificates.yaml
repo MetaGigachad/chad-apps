@@ -17,9 +17,9 @@ metadata:
   name: {{ $item.subdomain }}-cert
   namespace: {{ $item.namespace }}
 spec:
-  commonName: {{ $item.subdomain }}.metachad.duckdns.org
+  commonName: {{ $item.subdomain }}.metachad.{{ $.Values.dns.rootDomain }}
   dnsNames:
-    - {{ $item.subdomain }}.metachad.duckdns.org
+    - {{ $item.subdomain }}.metachad.{{ $.Values.dns.rootDomain }}
   secretName: {{ $item.subdomain }}-cert
   issuerRef:
     name: {{ $ca }}

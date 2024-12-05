@@ -6,7 +6,7 @@ metadata:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
   rules:
-    - host: training.metachad.duckdns.org
+    - host: training.metachad.{{ $.Values.dns.rootDomain }}
       http:
         paths:
           - path: /
@@ -25,5 +25,5 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - training.metachad.duckdns.org
+        - training.metachad.{{ $.Values.dns.rootDomain }}
       secretName: training-cert
