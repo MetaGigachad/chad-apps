@@ -4,9 +4,9 @@ hydra:
   config: 
     urls:
       self:
-        issuer: https://auth.metachad.duckdns.org
-      login: https://auth.metachad.duckdns.org/login
-      consent: https://auth.metachad.duckdns.org/consent
+        issuer: https://auth.metachad.mooo.com
+      login: https://auth.metachad.mooo.com/login
+      consent: https://auth.metachad.mooo.com/consent
 maester:
   enabled: false
 deployment:

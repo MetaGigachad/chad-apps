@@ -7,7 +7,7 @@ metadata:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
   rules:
-    - host: prometheus.metachad.{{ $.Values.dns.rootDomain }}
+    - host: grafana.metachad.{{ $.Values.dns.rootDomain }}
       http:
         paths:
           - path: /

@@ -4,7 +4,7 @@ info:
   description: Backend for training app
   version: 1.0.0
 servers:
-  - url: https://training.metachad.duckdns.org/api
+  - url: https://training.metachad.mooo.com/api
 paths:
   /config:
     get:
