@@ -2,6 +2,8 @@
 
 This repository contains implementation of [onboarding](#-onboarding-app) and [training](#-training-app) apps with [Single Sign-On](#-auth-app-for-single-sign-on-sso).
 
+You can use those apps at [onboarding.metachad.mooo.com](https://onboarding.metachad.mooo.com) and [training.metachad.mooo.com](https://training.metachad.mooo.com).
+
 ### 🔒 Auth App for Single Sign-On (SSO)
 
 In [auth_frontend](./auth_frontend) and [auth_service](./auth_service) you can find an 
@@ -23,8 +25,8 @@ your achievements. Implementation can be found in
 
 ### 🔨 Build
 
-You can build docker image of any node by running `make build_{node_name}` in `./deploy`
-directory.
+You can build docker image of any node by running `make build_{service_name}` in `./deploy`
+directory, or you can build every service locally by following corresponding instructions.
 
 ### 🚀 Deploy
 
@@ -35,7 +37,7 @@ to check files in [values](./deploy/k8s/values), they may contain passwords
 from main values that need to be written in. After that use `helmfile apply .`
 to install charts.
 
-If your using `minikube` you will need and `ingress` addon enabled.
+If you are using `minikube` you will need and `ingress` addon enabled.
 
 ### ✅ Plans for future
 

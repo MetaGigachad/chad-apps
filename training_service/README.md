@@ -1,6 +1,6 @@
 # Training Service
 
-Backend for training app.
+Backend for Training App. Written in C++ using [userver](https://userver.tech/) framework. Uses Postgres for persistence.
 
 ### Overview
 
@@ -23,13 +23,15 @@ make attach-to-dev-container
 make build-release
 ```
 
+### How to run
+
 Run with
 
 ```sh
 build_release/training_service --static-config path/to/static-config.yaml
 ```
 
-### Notes
+### Service dependecies
 
-- Integrations tests do not work
-- Expect many Makefile entries to not work
+1. Ory Hydra (Admin API)
+2. Postgres
